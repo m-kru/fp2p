@@ -1,6 +1,4 @@
 import argparse
-import re
-import ast
 import sre_yield
 import natsort
 from ruamel.yaml import YAML
@@ -80,10 +78,39 @@ def prepare_chain_link(files):
     return link
 
 
+def parse_chain_list_string(chain_string):
+    list = []
+
+    file = ''
+    while True:
+        if not chain_string:
+            if file:
+                list.append(file)
+            break
+
+        c = chain_string[0]
+        chain_string = chain_string[1:]
+
+        if c == ',':
+            if file:
+                list.append(file)
+            file = ''
+        elif c == '[':
+            l, chain_string = parse_chain_list_string(chain_string)
+            list.append(l)
+        elif c == ']':
+            if file:
+                list.append(file)
+            break
+        else:
+            file += c
+
+    return list, chain_string
+
+
 def prepare_map_chain(chain_string):
 
-    chain_string = re.sub(r'(\w+([.]\w+|))', r'"\1"', chain_string)
-    chain_list = ast.literal_eval(chain_string)
+    chain_list, _ = parse_chain_list_string(chain_string)
 
     map_chain = []
     for link in chain_list:
