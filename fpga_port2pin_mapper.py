@@ -138,7 +138,8 @@ def resolve_map_chain(map_chain):
 
             if 'terminal' in map_chain[i][key]:
                 if 'terminal' in aux:
-                    raise Exception(f"Trying to map to the terminal endpoint: {key}, map chain level: {i}")
+                    print(f"ERROR: Trying to map to the terminal endpoint: '{key}', map chain level: {i}")
+                    sys.exit(1)
                 else:
                     aux['terminal'] = None
 

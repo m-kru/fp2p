@@ -1,0 +1,10 @@
+__global__:
+  set_property:
+    IOSTANDARD: LVDS_25
+    DIFF_TERM: TRUE
+
+port_1:
+  endpoint: endpoint_1
+
+port_2:
+  endpoint: endpoint_2
