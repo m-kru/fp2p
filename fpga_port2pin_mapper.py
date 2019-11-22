@@ -169,17 +169,26 @@ def read_connection_file(file):
 
 
 def map_ports_to_pins(connection, mapping):
+    found_violation = False
+
     for k in connection:
+
         endpoint = connection[k]['endpoint']
         m = mapping.pop(endpoint, None)
+
+        if m is None:
+            print(f"ERROR: Port '{k}' connected to missing endpoint '{endpoint}'!")
+            found_violation = True
+            continue
+
         connection[k]['fpga_pin'] = m['pin']
-        if 'terminal' in m:
-            connection[k]['is_terminal'] = None
-        else:
+        if 'terminal' not in m:
             print(f"WARNING: Port '{k}' mapped to pin '{m['pin']}' connected to non terminal endpoint '{endpoint}'!")
 
+    if found_violation:
+        sys.exit(1)
+
     # If there are any terminal ends left, report it as error and exit.
-    found_violation = False
     for k, v in mapping.items():
         if 'terminal' in v:
             print(f"ERROR: Terminal endpoint '{k}', connected to pin '{v['pin']}' is not mapped to any port!")
