@@ -10,18 +10,18 @@ def parse_command_line_arguments():
     parser = argparse.ArgumentParser(
         prog='fpga_port2pin_mapper',
         description="Program for automatic mapping of ports to pins in FPGA designs. Especially useful when signals "
-                    "propagate through multiple PCBs."
+                    "propagate through multiple PCBs. It is capable of simple regex expanding and applies natural "
+                    "(human) sort for pairing generated keys and values."
     )
 
-    parser.add_argument('connection', help="File describing connection between ports and terminal endpoints in the "
-                                           "last files of the map chain.")
-    parser.add_argument('map_chain', help="Chain (list) of csv files describing mappings. Different levels of "
+    parser.add_argument('connection', help="File describing connection between ports and ends defined in the map chain.")
+    parser.add_argument('map_chain', help="Chain (list) of yaml files describing mappings. Different levels of "
                                           "mapping are separated by commas ','. Each level can consist of multiple "
-                                          "files. In such case use square brackets '[]' to group them. Example: "
-                                          "'level_1,[level_2_1,level_2_2],level_3'. The chain must start with "
-                                          "mapping of a FPGA pins and end with mapping of terminal pins (in short, "
-                                          "it is user responsibility to preserve the correct order of mappings when "
-                                          "invoking the program.")
+                                          "files. In such case use square brackets '[]' to group them. Lists can be "
+                                          "nested. Example: 'level_1,[level_2_1,[level_2_2_1,level_2_2_2]],level_3'."
+                                          "The chain must start with mapping of FPGA pins and should end with mapping"
+                                          " of terminal pins (in short, it is user responsibility to preserve "
+                                          "the correct order of mappings when invoking the program.")
     parser.add_argument('output_file', help="Output constraints file destination.")
 
     return parser.parse_args()
