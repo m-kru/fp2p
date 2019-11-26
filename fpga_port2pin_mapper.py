@@ -74,7 +74,14 @@ def prepare_chain_link(files):
         if type(file) is list:
             link.update(prepare_chain_link(file))
         else:
-            link.update(get_mapping_from_file(file))
+            aux = get_mapping_from_file(file)
+
+            for k in aux:
+                if k in link:
+                    print(f"Conflict in keys names after mapping entry: {k}, file: {file}")
+                    sys.exit(1)
+
+            link.update(aux)
 
     return link
 
