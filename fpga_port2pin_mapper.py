@@ -231,7 +231,13 @@ def map_ports_to_pins(connection, mapping):
 
 def generate_constraint_file(connection, file):
     with open(file, 'w') as f:
-        pass
+        for k, v in connection.items():
+            pass
+            f.write("set_property PACKAGE_PIN %s [get_ports {%s}]\n" % (v['fpga_pin'], k))
+            if 'set_property' in v:
+                for k1, v1 in v['set_property'].items():
+                    f.write("set_property %s %s [get_ports {%s}]\n" % (k1, v1, k))
+            f.write("\n")
 
 
 def main():
