@@ -61,7 +61,8 @@ def get_mapping_from_file(file):
             mapping.update(aux)
             l3 = len(mapping)
             if l1 + l2 != l3:
-                raise Exception(f"Conflict in keys names after mapping entry: {k}, file: {file}")
+                print(f"Conflict in keys names after mapping entry: {k}, file: {file}")
+                sys.exit(1)
 
     return mapping
 
