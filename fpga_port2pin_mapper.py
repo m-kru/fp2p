@@ -28,6 +28,9 @@ def parse_command_line_arguments():
 
 
 def get_mapping_from_entry(key, value):
+    if 'regex' not in value:
+        return {key: value}
+
     keys = list(sre_yield.AllStrings(key))
     ends = list(sre_yield.AllStrings(value['end']))
 
@@ -227,7 +230,8 @@ def map_ports_to_pins(connection, mapping):
 
 
 def generate_constraint_file(connection, file):
-    pass
+    with open(file, 'w') as f:
+        pass
 
 
 def main():
