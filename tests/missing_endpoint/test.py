@@ -4,7 +4,7 @@ import subprocess
 
 class Test(unittest.TestCase):
     def test(self):
-        expected = "ERROR: Port 'port_2' connected to missing endpoint 'endpoint_2'!\n"
+        expected = "ERROR: Port 'port_2' connected to missing end 'endpoint_2'!\n"
 
         path = "./tests/missing_endpoint/"
         map_chain = f"{path}l_1,[{path}l_2_1,[{path}l_2_2]"

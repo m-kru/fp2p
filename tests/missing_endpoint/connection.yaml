@@ -4,8 +4,8 @@ __global__:
     DIFF_TERM: TRUE
 
 port_1:
-  endpoint: endpoint_1
+  end: endpoint_1
 port_2:
-  endpoint: endpoint_2
+  end: endpoint_2
 port_3:
-  endpoint: endpoint_3
+  end: endpoint_3

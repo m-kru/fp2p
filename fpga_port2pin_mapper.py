@@ -138,7 +138,7 @@ def resolve_map_chain(map_chain):
 
             if 'terminal' in map_chain[i][key]:
                 if 'terminal' in aux:
-                    print(f"ERROR: Trying to map to the terminal endpoint: '{key}', map chain level: {i}")
+                    print(f"ERROR: Trying to map to the terminal end: '{key}', map chain level: {i}")
                     sys.exit(1)
                 else:
                     aux['terminal'] = None
@@ -174,17 +174,17 @@ def map_ports_to_pins(connection, mapping):
 
     for k in connection:
 
-        endpoint = connection[k]['endpoint']
-        m = mapping.pop(endpoint, None)
+        end = connection[k]['end']
+        m = mapping.pop(end, None)
 
         if m is None:
-            print(f"ERROR: Port '{k}' connected to missing endpoint '{endpoint}'!")
+            print(f"ERROR: Port '{k}' connected to missing end '{end}'!")
             found_violation = True
             continue
 
         connection[k]['fpga_pin'] = m['pin']
         if 'terminal' not in m:
-            print(f"WARNING: Port '{k}' mapped to pin '{m['pin']}' connected to non terminal endpoint '{endpoint}'!")
+            print(f"WARNING: Port '{k}' mapped to pin '{m['pin']}' connected to non terminal end '{end}'!")
 
     if found_violation:
         sys.exit(1)
@@ -192,7 +192,7 @@ def map_ports_to_pins(connection, mapping):
     # If there are any terminal ends left, report it as error and exit.
     for k, v in mapping.items():
         if 'terminal' in v:
-            print(f"ERROR: Terminal endpoint '{k}', connected to pin '{v['pin']}' is not mapped to any port!")
+            print(f"ERROR: Terminal end '{k}', connected to pin '{v['pin']}' is not mapped to any port!")
             found_violation = True
 
     if found_violation:

@@ -4,7 +4,7 @@ import subprocess
 
 class Test(unittest.TestCase):
     def test(self):
-        expected = "ERROR: Terminal endpoint 'endpoint_1', connected to pin 'A1' is not mapped to any port!\n"
+        expected = "ERROR: Terminal end 'endpoint_1', connected to pin 'A1' is not mapped to any port!\n"
 
         path = "./tests/unconnected_terminal/"
         map_chain = f"{path}l_1,[{path}l_2_1,[{path}l_2_2]"

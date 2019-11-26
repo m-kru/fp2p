@@ -4,9 +4,9 @@ import subprocess
 
 class Test(unittest.TestCase):
     def test(self):
-        expected = """WARNING: Port 'port_1' mapped to pin 'A1' connected to non terminal endpoint 'endpoint_1'!
-WARNING: Port 'port_2' mapped to pin 'A2' connected to non terminal endpoint 'endpoint_2'!
-WARNING: Port 'port_3' mapped to pin 'A3' connected to non terminal endpoint 'endpoint_3'!
+        expected = """WARNING: Port 'port_1' mapped to pin 'A1' connected to non terminal end 'endpoint_1'!
+WARNING: Port 'port_2' mapped to pin 'A2' connected to non terminal end 'endpoint_2'!
+WARNING: Port 'port_3' mapped to pin 'A3' connected to non terminal end 'endpoint_3'!
 """
 
         path = "./tests/port_to_non_terminal/"
