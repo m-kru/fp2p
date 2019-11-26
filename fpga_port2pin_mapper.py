@@ -174,7 +174,8 @@ def read_connection_file(file):
         connection.update(aux)
         l3 = len(connection)
         if l1 + l2 != l3:
-            raise Exception(f"Conflict in keys names after mapping port: {k}, file: {file}")
+            print(f"Conflict in keys names after mapping port: {k}, file: {file}")
+            sys.exit(1)
 
     return connection
 
