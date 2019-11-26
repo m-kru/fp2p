@@ -7,7 +7,7 @@ class Test(unittest.TestCase):
         expected = "ERROR: Trying to map to the terminal end: 's2', map chain level: 1\n"
 
         path = "./tests/mapping_to_terminal/"
-        map_chain = f"{path}l_1,[{path}l_2_1,[{path}l_2_2]"
+        map_chain = f"{path}l_1,[{path}l_2_1,{path}l_2_2]"
 
         actual = ''
         try:

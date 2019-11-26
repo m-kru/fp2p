@@ -7,7 +7,7 @@ class Test(unittest.TestCase):
         expected = "ERROR: Terminal end 'endpoint_1', connected to pin 'A1' is not mapped to any port!\n"
 
         path = "./tests/unconnected_terminal/"
-        map_chain = f"{path}l_1,[{path}l_2_1,[{path}l_2_2]"
+        map_chain = f"{path}l_1,[{path}l_2_1,{path}l_2_2]"
 
         actual = ''
         try:

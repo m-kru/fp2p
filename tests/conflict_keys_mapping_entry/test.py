@@ -7,7 +7,7 @@ class Test(unittest.TestCase):
         expected = "Conflict in keys names after mapping entry: s1, file: ./tests/conflict_keys_mapping_entry/l_2_1\n"
 
         path = "./tests/conflict_keys_mapping_entry/"
-        map_chain = f"{path}l_1,[{path}l_2_1,[{path}l_2_2]"
+        map_chain = f"{path}l_1,[{path}l_2_1,{path}l_2_2]"
 
         actual = ''
         try:

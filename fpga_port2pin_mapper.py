@@ -109,6 +109,12 @@ def parse_chain_list_string(chain_string):
     return list, chain_string
 
 
+def map_chain_sanity_check(chain_string):
+    if chain_string.count('[') != chain_string.count(']'):
+        print("Inconsistent number of '[' and ']' in map_chain string")
+        sys.exit(1)
+
+
 def prepare_map_chain(chain_string):
 
     chain_list, _ = parse_chain_list_string(chain_string)
@@ -222,6 +228,7 @@ def main():
 
     connection = read_connection_file(args.connection)
 
+    map_chain_sanity_check(args.map_chain)
     map_chain = prepare_map_chain(args.map_chain)
     mapping = resolve_map_chain(map_chain)
 
