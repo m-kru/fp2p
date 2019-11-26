@@ -153,18 +153,28 @@ def resolve_map_chain(map_chain):
 def read_connection_file(file):
     with open(file) as f:
         yaml = YAML(typ='safe')
-        connection = yaml.load(f)
+        mapping = yaml.load(f)
 
-    global_settings = connection.pop('__global__', None)
+    global_settings = mapping.pop('__global__', None)
     if global_settings is not None:
-        for port in connection:
+        for port in mapping:
             for k, v in global_settings.items():
-                if k in connection[port]:
-                    aux = connection[port][k]
-                    connection[port][k] = copy.deepcopy(v)
-                    connection[port][k].update(aux)
+                if k in mapping[port]:
+                    aux = mapping[port][k]
+                    mapping[port][k] = copy.deepcopy(v)
+                    mapping[port][k].update(aux)
                 else:
-                    connection[port][k] = v
+                    mapping[port][k] = v
+
+    connection = {}
+    for k, v in mapping.items():
+        aux = get_mapping_from_entry(k, v)
+        l1 = len(aux)
+        l2 = len(connection)
+        connection.update(aux)
+        l3 = len(connection)
+        if l1 + l2 != l3:
+            raise Exception(f"Conflict in keys names after mapping port: {k}, file: {file}")
 
     return connection
 
