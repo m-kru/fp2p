@@ -139,6 +139,20 @@ def prepare_map_chain(chain_string):
     return map_chain
 
 
+def detect_dangling_terminals(map_chain):
+    violations_found = False
+
+    for i in range(0, len(map_chain)):
+        for k in map_chain[i]:
+            if 'terminal' in map_chain[i][k]:
+                print(f"ERROR: Dangling terminal, key: {k}, map chain level: {i}")
+                violations_found = True
+        pass
+
+    if violations_found:
+        sys.exit(1)
+
+
 def resolve_map_chain(map_chain):
     pins = list(map_chain[0].keys())
 
@@ -153,16 +167,19 @@ def resolve_map_chain(map_chain):
             if key not in map_chain[i]:
                 break
 
-            if 'terminal' in map_chain[i][key]:
+            link = map_chain[i].pop(key, None)
+            if 'terminal' in link:
                 if 'terminal' in aux:
                     print(f"ERROR: Trying to map to the terminal end: '{key}', map chain level: {i}")
                     sys.exit(1)
                 else:
                     aux['terminal'] = None
 
-            key = map_chain[i][key]['end']
+            key = link['end']
 
         mapping[key] = aux
+
+    detect_dangling_terminals(map_chain)
 
     return mapping
 

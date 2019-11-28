@@ -1,9 +1,3 @@
 s4:
   end: endpoint_4
   terminal:
-s5:
-  end: endpoint_5
-  terminal:
-s6:
-  end: endpoint_6
-  terminal:
