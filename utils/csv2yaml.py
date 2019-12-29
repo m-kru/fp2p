@@ -9,6 +9,7 @@ def parse_command_line_arguments():
 
     parser.add_argument('csv_file', help="Input csv file.")
     parser.add_argument('--sep', default=',', choices=[',', ';'], help="CSV separator.")
+    parser.add_argument('--reverse', action='store_true', help="Reverse csv columns.")
     parser.add_argument('-o', help="Output yaml file.")
 
     return parser.parse_args()
@@ -26,6 +27,11 @@ def main():
 
             key = line.split(args.sep)[0].strip()
             end = line.split(args.sep)[1].strip()
+
+            if args.reverse:
+                aux = key
+                key = end
+                end = aux
 
             yaml_content += key + ':\n  ' + 'end: ' + end + '\n'
 
