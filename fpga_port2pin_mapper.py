@@ -189,10 +189,10 @@ def read_connection_file(file):
         yaml = YAML(typ='safe')
         mapping = yaml.load(f)
 
-    global_settings = mapping.pop('__global__', None)
-    if global_settings is not None:
+    common_settings = mapping.pop('default', None)
+    if common_settings is not None:
         for port in mapping:
-            for k, v in global_settings.items():
+            for k, v in common_settings.items():
                 if k in mapping[port]:
                     aux = mapping[port][k]
                     mapping[port][k] = copy.deepcopy(v)
