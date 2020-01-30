@@ -1,3 +1,7 @@
-s4:
-  end: endpoint_4
-  terminal:
+default:
+    terminal:
+s3:
+  end: end_pin_3
+s_diff_pin_[pn]:
+  end: end_diff_pin_[pn]
+  regex:

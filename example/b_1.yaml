@@ -1,5 +1,9 @@
 A[1-3]:
-    end: s[1-3]
-    regex:
+  end: s[1-3]
+  regex:
 A4:
-    end: s4
+  end: end_pin_4
+  terminal:
+B1[2-3]:
+  end: s_diff_pin_[pn]
+  regex:

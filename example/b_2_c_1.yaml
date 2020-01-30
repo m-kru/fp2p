@@ -1,6 +1,3 @@
 s1:
-  end: endpoint_1
-  terminal:
-s2:
-  end: endpoint_2
+  end: end_pin_1
   terminal:
