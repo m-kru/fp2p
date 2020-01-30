@@ -27,6 +27,21 @@ def parse_command_line_arguments():
     return parser.parse_args()
 
 
+def set_default_parameters(mapping):
+    common_settings = mapping.pop('default', None)
+    if common_settings is not None:
+        for port in mapping:
+            for k, v in common_settings.items():
+                if k in mapping[port]:
+                    aux = mapping[port][k]
+                    mapping[port][k] = copy.deepcopy(v)
+                    mapping[port][k].update(aux)
+                else:
+                    mapping[port][k] = v
+
+    return mapping
+
+
 def get_mapping_from_entry(key, value):
     if 'regex' not in value:
         return {key: value}
@@ -57,15 +72,17 @@ def get_mapping_from_file(file):
     with open(file) as f:
         map_dict = yaml.load(f)
 
-        for k, v in map_dict.items():
-            aux = get_mapping_from_entry(k, v)
-            l1 = len(aux)
-            l2 = len(mapping)
-            mapping.update(aux)
-            l3 = len(mapping)
-            if l1 + l2 != l3:
-                print(f"Conflict in keys names after mapping entry: {k}, file: {file}")
-                sys.exit(1)
+    map_dict = set_default_parameters(map_dict)
+
+    for k, v in map_dict.items():
+        aux = get_mapping_from_entry(k, v)
+        l1 = len(aux)
+        l2 = len(mapping)
+        mapping.update(aux)
+        l3 = len(mapping)
+        if l1 + l2 != l3:
+            print(f"Conflict in keys names after mapping entry: {k}, file: {file}")
+            sys.exit(1)
 
     return mapping
 
@@ -189,16 +206,7 @@ def read_connection_file(file):
         yaml = YAML(typ='safe')
         mapping = yaml.load(f)
 
-    common_settings = mapping.pop('default', None)
-    if common_settings is not None:
-        for port in mapping:
-            for k, v in common_settings.items():
-                if k in mapping[port]:
-                    aux = mapping[port][k]
-                    mapping[port][k] = copy.deepcopy(v)
-                    mapping[port][k].update(aux)
-                else:
-                    mapping[port][k] = v
+    mapping = set_default_parameters(mapping)
 
     connection = {}
     for k, v in mapping.items():
