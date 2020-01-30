@@ -14,11 +14,11 @@ def parse_command_line_arguments():
                     "(human) sort for pairing generated keys and values."
     )
 
-    parser.add_argument('connection', help="File describing connection between ports and ends defined in the map chain.")
-    parser.add_argument('map_chain', help="Chain (list) of yaml files describing mappings. Different levels of "
-                                          "mapping are separated by commas ','. Each level can consist of multiple "
+    parser.add_argument('connection', help="File describing connection between ports and terminal pins defined in the map chain.")
+    parser.add_argument('map_chain', help="Chain (list) of yaml files describing mappings. Different nodes of "
+                                          "mapping are separated by commas ','. Each node can consist of multiple "
                                           "files. In such case use square brackets '[]' to group them. Lists can be "
-                                          "nested. Example: 'level_1,[level_2_1,[level_2_2_1,level_2_2_2]],level_3'."
+                                          "nested. Example: 'node_1,[node_2_1,[node_2_2_1,node_2_2_2]],node_3'."
                                           "The chain must start with mapping of FPGA pins and should end with mapping"
                                           " of terminal pins (in short, it is user responsibility to preserve "
                                           "the correct order of mappings when invoking the program.")
@@ -145,7 +145,7 @@ def detect_dangling_terminals(map_chain):
     for i in range(0, len(map_chain)):
         for k in map_chain[i]:
             if 'terminal' in map_chain[i][k]:
-                print(f"ERROR: Dangling terminal, key: {k}, map chain level: {i}")
+                print(f"ERROR: Dangling terminal, key: {k}, map chain node: {i}")
                 violations_found = True
         pass
 
@@ -170,7 +170,7 @@ def resolve_map_chain(map_chain):
             link = map_chain[i].pop(key, None)
             if 'terminal' in link:
                 if 'terminal' in aux:
-                    print(f"ERROR: Trying to map to the terminal end: '{key}', map chain level: {i}")
+                    print(f"ERROR: Trying to map to the terminal end: '{key}', map chain node: {i}")
                     sys.exit(1)
                 else:
                     aux['terminal'] = None

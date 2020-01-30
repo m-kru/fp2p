@@ -5,8 +5,8 @@ import subprocess
 class Test(unittest.TestCase):
     def test(self):
 
-        expected = """ERROR: Dangling terminal, key: s5, map chain level: 1
-ERROR: Dangling terminal, key: s6, map chain level: 1\n"""
+        expected = """ERROR: Dangling terminal, key: s5, map chain node: 1
+ERROR: Dangling terminal, key: s6, map chain node: 1\n"""
 
         path = "./tests/dangling_terminal/"
         map_chain = f"{path}l_1.yaml,[{path}l_2_1.yaml,[{path}l_2_2_1.yaml,{path}l_2_2_2.yaml]]"
