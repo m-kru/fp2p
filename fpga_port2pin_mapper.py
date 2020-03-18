@@ -1,10 +1,11 @@
 import argparse
 import sre_yield
-import natsort
-from ruamel.yaml import YAML
 import copy
 import sys
+import pprint
 
+import natsort
+from ruamel.yaml import YAML
 
 def parse_command_line_arguments():
     parser = argparse.ArgumentParser(
@@ -14,15 +15,25 @@ def parse_command_line_arguments():
                     "(human) sort for pairing generated keys and values."
     )
 
-    parser.add_argument('connection', help="File describing connection between ports and terminal pins defined in the map chain.")
-    parser.add_argument('map_chain', help="Chain (list) of yaml files describing mappings. Different nodes of "
-                                          "mapping are separated by commas ','. Each node can consist of multiple "
-                                          "files. In such case use square brackets '[]' to group them. Lists can be "
-                                          "nested. Example: 'node_1,[node_2_1,[node_2_2_1,node_2_2_2]],node_3'."
-                                          "The chain must start with mapping of FPGA pins and should end with mapping"
-                                          " of terminal pins (in short, it is user responsibility to preserve "
-                                          "the correct order of mappings when invoking the program.")
-    parser.add_argument('output_file', help="Output constraints file destination.")
+    subparsers = parser.add_subparsers()
+
+    map_chain_help = """Chain (list) of yaml files describing mappings. Different nodes of
+                        mapping are separated by commas ','. Each node can consist of multiple
+                        files. In such case use square brackets '[]' to group them. Lists can be
+                        nested. Example: 'node_1,[node_2_1,[node_2_2_1,node_2_2_2]],node_3'.
+                        The chain must start with mapping of FPGA pins and should end with mapping
+                        of terminal pins (in short, it is user responsibility to preserve
+                        the correct order of mappings when invoking the program."""
+
+    resolve_parser = subparsers.add_parser("resolve", help="Only resolve mapping and print the result.")
+    resolve_parser.add_argument('map_chain', help=map_chain_help)
+    resolve_parser.set_defaults(func=resolve)
+
+    map_parser = subparsers.add_parser("map", help="Map ports to pins.")
+    map_parser.add_argument('connection', help="File describing connection between ports and terminal pins defined in the map chain.")
+    map_parser.add_argument('map_chain', help=map_chain_help)
+    map_parser.add_argument('output_file', help="Output constraints file destination.")
+    map_parser.set_defaults(func=map)
 
     return parser.parse_args()
 
@@ -265,19 +276,24 @@ def generate_constraint_file(connection, file):
             f.write("\n")
 
 
+def resolve(mapping, args):
+    pprint.pprint(mapping)
+
+
+def map(mapping, args):
+    connection = read_connection_file(args.connection)
+    connection = map_ports_to_pins(connection, mapping)
+    generate_constraint_file(connection, args.output_file)
+
+
 def main():
     args = parse_command_line_arguments()
-
-    connection = read_connection_file(args.connection)
 
     map_chain_sanity_check(args.map_chain)
     map_chain = prepare_map_chain(args.map_chain)
     mapping = resolve_map_chain(map_chain)
 
-    connection = map_ports_to_pins(connection, mapping)
-
-    generate_constraint_file(connection, args.output_file)
-    pass
+    args.func(mapping, args)
 
 
 if __name__ == '__main__':

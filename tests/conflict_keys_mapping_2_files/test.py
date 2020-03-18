@@ -13,6 +13,7 @@ class Test(unittest.TestCase):
         try:
             actual = subprocess.check_output(['python',
                                               'fpga_port2pin_mapper.py',
+                                              'map',
                                               f"{path}connection.yaml",
                                               map_chain,
                                               'tmp.xdc'])

@@ -13,6 +13,7 @@ WARNING: Port 'port_3' mapped to pin 'A3' connected to non terminal end 'endpoin
         map_chain = f"{path}l_1.yaml,[{path}l_2_1.yaml,[{path}l_2_2_1.yaml,{path}l_2_2_2]]"
         actual = subprocess.check_output(['python',
                                           'fpga_port2pin_mapper.py',
+                                          'map',
                                           f"{path}connection.yaml",
                                           map_chain,
                                           'tmp.xdc'])
