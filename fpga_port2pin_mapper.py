@@ -23,14 +23,6 @@ def parse_command_line_arguments():
 
     subparsers = parser.add_subparsers()
 
-    map_chain_help = """Chain (list) of yaml files describing mappings. Different nodes of
-                        mapping are separated by commas ','. Each node can consist of multiple
-                        files. In such case use square brackets '[]' to group them. Lists can be
-                        nested. Example: 'node_1,[node_2_1,[node_2_2_1,node_2_2_2]],node_3'.
-                        The chain must start with mapping of FPGA pins and should end with mapping
-                        of terminal pins (in short, it is user responsibility to preserve
-                        the correct order of mappings when invoking the program."""
-
     map_tree_help = "Yaml file describing mapping tree."
 
     resolve_parser = subparsers.add_parser("resolve", help="Only resolve mapping and print the result.")
@@ -39,7 +31,7 @@ def parse_command_line_arguments():
 
     map_parser = subparsers.add_parser("map", help="Map ports to pins.")
     map_parser.add_argument('connection', help="File describing connection between ports and terminal pins defined in the map chain.")
-    map_parser.add_argument('map_tree', help=map_chain_help)
+    map_parser.add_argument('map_tree', help=map_tree_help)
     map_parser.add_argument('output_file', help="Output constraints file destination.")
     map_parser.set_defaults(func=map)
 
@@ -436,8 +428,6 @@ def main():
     get_file_mappings()
     get_nodes_mappings(map_tree)
     nodes_mappings_sanity_check(map_tree)
-
-#    map_chain = prepare_map_chain(args.map_chain) to omijam bo jest w pliku teraz zdefiniowane
 
     mapping = resolve_map_tree(map_tree)
 
