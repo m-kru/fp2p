@@ -1,3 +1,6 @@
 s1:
   end: end_pin_1
   terminal:
+
+sl:
+  end: led_0

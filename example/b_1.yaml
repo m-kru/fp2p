@@ -7,3 +7,5 @@ A4:
 B1[2-3]:
   end: s_diff_pin_[pn]
   regex:
+C2:
+  end: sl

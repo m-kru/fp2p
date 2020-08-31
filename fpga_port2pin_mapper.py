@@ -7,6 +7,12 @@ import pprint
 import natsort
 from ruamel.yaml import YAML
 
+
+def print_and_exit(msg):
+    print(msg)
+    sys.exit(1)
+
+
 def parse_command_line_arguments():
     parser = argparse.ArgumentParser(
         prog='fpga_port2pin_mapper',
@@ -25,13 +31,15 @@ def parse_command_line_arguments():
                         of terminal pins (in short, it is user responsibility to preserve
                         the correct order of mappings when invoking the program."""
 
+    map_tree_help = "Yaml file describing mapping tree."
+
     resolve_parser = subparsers.add_parser("resolve", help="Only resolve mapping and print the result.")
-    resolve_parser.add_argument('map_chain', help=map_chain_help)
+    resolve_parser.add_argument('map_tree', help=map_tree_help)
     resolve_parser.set_defaults(func=resolve)
 
     map_parser = subparsers.add_parser("map", help="Map ports to pins.")
     map_parser.add_argument('connection', help="File describing connection between ports and terminal pins defined in the map chain.")
-    map_parser.add_argument('map_chain', help=map_chain_help)
+    map_parser.add_argument('map_tree', help=map_chain_help)
     map_parser.add_argument('output_file', help="Output constraints file destination.")
     map_parser.set_defaults(func=map)
 
@@ -51,6 +59,20 @@ def set_default_parameters(mapping):
                     mapping[port][k] = v
 
     return mapping
+
+
+def apply_prefix_parameter(mapping):
+    new_mapping = {}
+
+    for port in mapping:
+        new_key = port
+        if 'prefix' in mapping[port]:
+            new_key = mapping[port]['prefix'] + new_key
+            _ = mapping[port].pop('prefix', None)
+
+        new_mapping[new_key] = mapping[port]
+
+    return new_mapping
 
 
 def get_mapping_from_entry(key, value):
@@ -84,6 +106,7 @@ def get_mapping_from_file(file):
         map_dict = yaml.load(f)
 
     map_dict = set_default_parameters(map_dict)
+    map_dict = apply_prefix_parameter(map_dict)
 
     for k, v in map_dict.items():
         aux = get_mapping_from_entry(k, v)
@@ -92,8 +115,7 @@ def get_mapping_from_file(file):
         mapping.update(aux)
         l3 = len(mapping)
         if l1 + l2 != l3:
-            print(f"Conflict in keys names after mapping entry: {k}, file: {file}")
-            sys.exit(1)
+            print_and_exit(f"ERROR: Conflict in keys names after mapping entry: {k}, file: {file}")
 
     return mapping
 
@@ -109,8 +131,7 @@ def prepare_chain_link(files):
 
             for k in aux:
                 if k in link:
-                    print(f"Conflict in keys names after mapping entry: {k}, file: {file}")
-                    sys.exit(1)
+                    print_and_exit(f"ERROR: Conflict in keys names after mapping entry: {k}, file: {file}")
 
             link.update(aux)
 
@@ -147,10 +168,103 @@ def parse_chain_list_string(chain_string):
     return list, chain_string
 
 
-def map_chain_sanity_check(chain_string):
-    if chain_string.count('[') != chain_string.count(']'):
-        print("Inconsistent number of '[' and ']' in map_chain string")
-        sys.exit(1)
+found_node_names = []
+
+
+def map_tree_sanity_check(node):
+    if 'files' not in node:
+        raise BaseException(f"Missing 'files' key in node : {node['name']}")
+    else:
+        if not node['files']:
+            raise BaseException(f"Found empty files list in node: {node['name']}")
+
+    for key, val in node.items():
+        if key == 'name':
+            if val in found_node_names:
+                raise BaseException(f"Duplicated node name: {val}")
+            found_node_names.append(val)
+        elif key == 'nodes':
+            if not val:
+                print_and_exit(f"ERROR: Found empty nodes list in node '{node['name']}'.")
+
+            for node in val:
+                map_tree_sanity_check(node)
+
+
+mapping_files = set()
+
+
+def get_mapping_files(node):
+    for f in node['files']:
+        mapping_files.add(f)
+
+    if 'nodes' in node:
+        if node['nodes']:
+            for node in node['nodes']:
+                get_mapping_files(node)
+        else:
+            raise BaseException(f"Found empty nodes list in node: {node['name']}")
+
+    return mapping_files
+
+
+files_mappings = {}
+
+
+def get_file_mappings():
+    for f in mapping_files:
+        files_mappings[f] = get_mapping_from_file(f)
+
+
+nodes_mappings = {}
+
+
+def get_nodes_mappings(node):
+    nm = {}
+
+    for f in node['files']:
+        fm = files_mappings[f]
+        for k, v in fm.items():
+            if k not in nm:
+                nm[k] = v
+            else:
+                print_and_exit(f"ERROR: Conflicting key '{k}' in node {node['name']}")
+
+    nodes_mappings[node['name']] = nm
+
+    if 'nodes' in node:
+        if node['nodes']:
+            for node in node['nodes']:
+                get_nodes_mappings(node)
+        else:
+            raise BaseException(f"Found empty nodes list in node: {node['name']}")
+
+    return nodes_mappings
+
+
+def nodes_mappings_sanity_check(node):
+    """
+    This function checks ensures that nodes having the same parent have unique keys.
+    In such case the mapping would be ambiguous.
+    It would be possible to explicitly define to which node the end should be connected, however this approach is rigid
+    to specific design and any reuse of mapping files would be tedious and time consuming.
+    """
+    nodes_to_check = []
+    for node in node['nodes']:
+        nodes_to_check.append(node['name'])
+
+    # Do not check in case of single node as such scenario is checked when node mapping is created.
+    if len(nodes_to_check) == 1:
+        return
+
+    unique_keys = {}
+
+    for name in nodes_to_check:
+        for k in nodes_mappings[name]:
+            if k not in unique_keys:
+                unique_keys[k] = name
+            else:
+                print_and_exit(f"ERROR: key '{k}' found in 2 nodes: {unique_keys[k]} and {name} having the same parent.")
 
 
 def prepare_map_chain(chain_string):
@@ -181,33 +295,52 @@ def detect_dangling_terminals(map_chain):
         sys.exit(1)
 
 
-def resolve_map_chain(map_chain):
-    pins = list(map_chain[0].keys())
+def resolve_single_mapping(mapping, node):
+    end = mapping['end']
+
+    node_map = nodes_mappings[node['name']]
+
+    if end in node_map:
+        if 'terminal' in mapping:
+            print_and_exit(f"ERROR: Trying to map to the terminal end: '{mapping['end']}', file: {f}")
+            sys.exit(1)
+
+        mapping['end'] = node_map[end]['end']
+        mapping['node_name'] = node['name']
+
+        if 'terminal' in node_map[end]:
+            mapping['terminal'] = None
+
+        if 'nodes' in node:
+            for node in node['nodes']:
+                mapping = resolve_single_mapping(mapping, node)
+
+    return mapping
+
+
+def resolve_map_tree(map_tree):
+    pins = []
+    keys = nodes_mappings[map_tree['name']].keys()
+    for p in keys:
+        pins.append(p)
 
     mapping = {}
 
     for pin in pins:
-        key = pin
+        m = {'pin': pin, 'node_name': None, 'end': pin}
+        m = resolve_single_mapping(m, map_tree)
 
-        aux = {'pin': pin}
+        key = m['node_name']
+        if key not in mapping:
+            mapping[key] = {}
 
-        for i in range(0, len(map_chain)):
-            if key not in map_chain[i]:
-                break
+        del m['node_name']
 
-            link = map_chain[i].pop(key, None)
-            if 'terminal' in link:
-                if 'terminal' in aux:
-                    print(f"ERROR: Trying to map to the terminal end: '{key}', map chain node: {i}")
-                    sys.exit(1)
-                else:
-                    aux['terminal'] = None
+        end = m['end']
+        del m['end']
 
-            key = link['end']
-
-        mapping[key] = aux
-
-    detect_dangling_terminals(map_chain)
+        mapping[key][end] = m
+#    detect_dangling_terminals(map_chain)
 
     return mapping
 
@@ -227,8 +360,7 @@ def read_connection_file(file):
         connection.update(aux)
         l3 = len(connection)
         if l1 + l2 != l3:
-            print(f"Conflict in keys names after mapping port: {k}, file: {file}")
-            sys.exit(1)
+            print_and_exit(f"ERROR: Conflict in keys names after mapping port: {k}, file: {file}")
 
     return connection
 
@@ -238,8 +370,13 @@ def map_ports_to_pins(connection, mapping):
 
     for k in connection:
 
+        node = connection[k]['node']
         end = connection[k]['end']
-        m = mapping.pop(end, None)
+
+        try:
+            m = mapping[node].pop(end, None)
+        except KeyError:
+            print_and_exit(f"ERROR: Node with name '{node}' not found!")
 
         if m is None:
             print(f"ERROR: Port '{k}' connected to missing end '{end}'!")
@@ -289,11 +426,23 @@ def map(mapping, args):
 def main():
     args = parse_command_line_arguments()
 
-    map_chain_sanity_check(args.map_chain)
-    map_chain = prepare_map_chain(args.map_chain)
-    mapping = resolve_map_chain(map_chain)
+    with open(args.map_tree) as f:
+        yaml = YAML(typ='safe')
+        map_tree = yaml.load(f)
+
+    map_tree_sanity_check(map_tree)
+
+    get_mapping_files(map_tree)
+    get_file_mappings()
+    get_nodes_mappings(map_tree)
+    nodes_mappings_sanity_check(map_tree)
+
+#    map_chain = prepare_map_chain(args.map_chain) to omijam bo jest w pliku teraz zdefiniowane
+
+    mapping = resolve_map_tree(map_tree)
 
     args.func(mapping, args)
+    pass
 
 
 if __name__ == '__main__':

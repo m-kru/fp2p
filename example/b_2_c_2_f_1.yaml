@@ -1,3 +1,6 @@
-s2:
+default:
+  prefix: s
+
+'2':
   end: end_pin_2
   terminal:

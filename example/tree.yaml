@@ -1,0 +1,11 @@
+name: board_1
+files: 
+  - b_1.yaml
+nodes:
+  - name: board_2_connector_1
+    files:
+      - b_2_c_1.yaml
+  - name: board_2_connector_2
+    files:
+      - b_2_c_2_f_1.yaml
+      - b_2_c_2_f_2.yaml
