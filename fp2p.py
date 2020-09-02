@@ -15,8 +15,8 @@ def print_and_exit(msg):
 
 def parse_command_line_arguments():
     parser = argparse.ArgumentParser(
-        prog='fpga_port2pin_mapper',
-        description="Program for automatic mapping of ports to pins in FPGA designs. Especially useful when signals "
+        prog='fp2p',
+        description="Program for automatic assignment of ports to pins in FPGA designs. Especially useful when signals "
                     "propagate through multiple PCBs. It is capable of simple regex expanding and applies natural "
                     "(human) sort for pairing generated keys and values."
     )
