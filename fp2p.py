@@ -309,7 +309,7 @@ def map_ports_to_pins(connection, mapping):
             print_and_exit(f"ERROR: Node with name '{node}' not found!")
 
         if m is None:
-            print(f"ERROR: Port '{k}' connected to missing end '{end}'!")
+            print_and_exit(f"ERROR: Port '{k}' connected to missing end '{end}'!")
             found_violation = True
             continue
 
