@@ -409,9 +409,9 @@ def resolve(mapping, args):
     pprint.pprint(mapping)
 
 
-def assign(mapping, args):
+def assign(resolved_tree, args):
     connection = read_assignment_file(args.assignment_file)
-    connection = map_ports_to_pins(connection, mapping)
+    connection = map_ports_to_pins(connection, resolved_tree)
     generate_constraint_file(connection, args.output_file)
 
 
@@ -429,9 +429,9 @@ def main():
     get_nodes_mappings(map_tree)
     nodes_mappings_sanity_check(map_tree)
 
-    mapping = resolve_map_tree(map_tree)
+    resolved_tree = resolve_map_tree(map_tree)
 
-    args.func(mapping, args)
+    args.func(resolved_tree, args)
     pass
 
 
