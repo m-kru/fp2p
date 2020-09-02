@@ -2,5 +2,5 @@ s1:
   end: end_pin_1
   terminal:
 
-sl:
+s_led:
   end: led_0
