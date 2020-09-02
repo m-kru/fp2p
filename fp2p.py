@@ -23,23 +23,23 @@ def parse_command_line_arguments():
 
     subparsers = parser.add_subparsers()
 
-    map_tree_help = "Yaml file describing mapping tree."
+    tree_help = "Yaml file describing mapping tree."
 
-    resolve_parser = subparsers.add_parser("resolve", help="Only resolve mapping and print the result.")
-    resolve_parser.add_argument('map_tree', help=map_tree_help)
+    resolve_parser = subparsers.add_parser("resolve", help="Only resolve mapping tree and print the result.")
+    resolve_parser.add_argument('tree_file', help=tree_help)
     resolve_parser.set_defaults(func=resolve)
 
-    map_parser = subparsers.add_parser("map", help="Map ports to pins.")
-    map_parser.add_argument('connection', help="File describing connection between ports and terminal pins defined in the map chain.")
-    map_parser.add_argument('map_tree', help=map_tree_help)
-    map_parser.add_argument('output_file', help="Output constraints file destination.")
-    map_parser.set_defaults(func=map)
+    assign_parser = subparsers.add_parser("assign", help="Assign ports to pins.")
+    assign_parser.add_argument('assignment_file', help="YAML file describing assignment for ports and terminal pins defined in the mapping tree.")
+    assign_parser.add_argument('tree_file', help=tree_help)
+    assign_parser.add_argument('output_file', help="Output constraints file destination.")
+    assign_parser.set_defaults(func=assign)
 
     return parser.parse_args()
 
 
 def set_default_parameters(mapping):
-    common_settings = mapping.pop('default', None)
+    common_settings = mapping.pop('_default_', None)
     if common_settings is not None:
         for port in mapping:
             for k, v in common_settings.items():
@@ -337,7 +337,7 @@ def resolve_map_tree(map_tree):
     return mapping
 
 
-def read_connection_file(file):
+def read_assignment_file(file):
     with open(file) as f:
         yaml = YAML(typ='safe')
         mapping = yaml.load(f)
@@ -409,8 +409,8 @@ def resolve(mapping, args):
     pprint.pprint(mapping)
 
 
-def map(mapping, args):
-    connection = read_connection_file(args.connection)
+def assign(mapping, args):
+    connection = read_assignment_file(args.assignment_file)
     connection = map_ports_to_pins(connection, mapping)
     generate_constraint_file(connection, args.output_file)
 
@@ -418,7 +418,7 @@ def map(mapping, args):
 def main():
     args = parse_command_line_arguments()
 
-    with open(args.map_tree) as f:
+    with open(args.tree_file) as f:
         yaml = YAML(typ='safe')
         map_tree = yaml.load(f)
 
