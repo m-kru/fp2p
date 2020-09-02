@@ -112,54 +112,6 @@ def get_mapping_from_file(file):
     return mapping
 
 
-def prepare_chain_link(files):
-    link = {}
-
-    for file in files:
-        if type(file) is list:
-            link.update(prepare_chain_link(file))
-        else:
-            aux = get_mapping_from_file(file)
-
-            for k in aux:
-                if k in link:
-                    print_and_exit(f"ERROR: Conflict in keys names after mapping entry: {k}, file: {file}")
-
-            link.update(aux)
-
-    return link
-
-
-def parse_chain_list_string(chain_string):
-    list = []
-
-    file = ''
-    while True:
-        if not chain_string:
-            if file:
-                list.append(file)
-            break
-
-        c = chain_string[0]
-        chain_string = chain_string[1:]
-
-        if c == ',':
-            if file:
-                list.append(file)
-            file = ''
-        elif c == '[':
-            l, chain_string = parse_chain_list_string(chain_string)
-            list.append(l)
-        elif c == ']':
-            if file:
-                list.append(file)
-            break
-        else:
-            file += c
-
-    return list, chain_string
-
-
 found_node_names = []
 
 
@@ -259,20 +211,6 @@ def nodes_mappings_sanity_check(node):
                 print_and_exit(f"ERROR: key '{k}' found in 2 nodes: {unique_keys[k]} and {name} having the same parent.")
 
 
-def prepare_map_chain(chain_string):
-
-    chain_list, _ = parse_chain_list_string(chain_string)
-
-    map_chain = []
-    for link in chain_list:
-        if type(link) is not list:
-            link = [link]
-        map_chain.append(prepare_chain_link(link))
-
-    pass
-    return map_chain
-
-
 def detect_dangling_terminals(map_chain):
     violations_found = False
 
@@ -310,7 +248,7 @@ def resolve_single_mapping(mapping, node):
     return mapping
 
 
-def resolve_map_tree(map_tree):
+def resolve_mapping_tree(map_tree):
     pins = []
     keys = nodes_mappings[map_tree['name']].keys()
     for p in keys:
@@ -429,7 +367,7 @@ def main():
     get_nodes_mappings(map_tree)
     nodes_mappings_sanity_check(map_tree)
 
-    resolved_tree = resolve_map_tree(map_tree)
+    resolved_tree = resolve_mapping_tree(map_tree)
 
     args.func(resolved_tree, args)
     pass
