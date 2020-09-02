@@ -1,4 +1,4 @@
-default:
+_default_:
   set_property:
     IOSTANDARD: LVDS_33
     # By default 'TRUE', 'true', 'True' are interpreted by yaml as boolean
