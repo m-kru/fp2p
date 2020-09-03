@@ -315,7 +315,7 @@ def map_ports_to_pins(connection, mapping):
 
         connection[k]['fpga_pin'] = m['pin']
         if 'terminal' not in m:
-            print(f"WARNING: Port '{k}' mapped to pin '{m['pin']}' connected to non terminal end '{end}'!")
+            print_and_exit(f"ERROR: Port '{k}' assigned to pin '{m['pin']}' connected to non terminal end '{end}'!")
 
     if found_violation:
         sys.exit(1)
