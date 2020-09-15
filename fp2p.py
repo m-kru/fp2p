@@ -67,6 +67,20 @@ def apply_prefix_parameter(mapping):
     return new_mapping
 
 
+def apply_suffix_parameter(mapping):
+    new_mapping = {}
+
+    for port in mapping:
+        new_key = port
+        if 'suffix' in mapping[port]:
+            new_key = new_key + mapping[port]['suffix']
+            _ = mapping[port].pop('suffix', None)
+
+        new_mapping[new_key] = mapping[port]
+
+    return new_mapping
+
+
 def get_mapping_from_entry(key, value):
     if 'regex' not in value:
         return {key: value}
@@ -99,6 +113,7 @@ def get_mapping_from_file(file):
 
     map_dict = set_default_parameters(map_dict)
     map_dict = apply_prefix_parameter(map_dict)
+    map_dict = apply_suffix_parameter(map_dict)
 
     for k, v in map_dict.items():
         aux = get_mapping_from_entry(k, v)
