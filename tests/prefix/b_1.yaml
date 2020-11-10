@@ -1,0 +1,8 @@
+_default_:
+  prefix: A
+
+"1":
+    end: b2_1
+
+"2":
+  end: b2_2

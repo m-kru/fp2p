@@ -1,0 +1,7 @@
+name: board_1
+files:
+  - b_1.yaml
+nodes:
+  - name: board_2
+    files:
+      - b_2.yaml
