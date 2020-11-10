@@ -14,8 +14,8 @@ import natsort
 from ruamel.yaml import YAML
 
 
-def print_and_exit(msg):
-    print(msg)
+def error_and_exit(msg):
+    print("\033[91mERROR\033[0m: " + msg)
     sys.exit(1)
 
 
@@ -103,7 +103,7 @@ def get_mapping_from_entry(key, value):
     ends = list(sre_yield.AllStrings(value["end"]))
 
     if len(keys) != len(ends):
-        raise Exception(
+        error_and_exit(
             f"Different lengths of lists after regex expansion for key: {key} end: {value['end']}"
         )
 
@@ -138,8 +138,8 @@ def get_mapping_from_file(file):
         mapping.update(aux)
         l3 = len(mapping)
         if l1 + l2 != l3:
-            print_and_exit(
-                f"ERROR: Conflict in keys names after mapping entry: {k}, file: {file}"
+            error_and_exit(
+                f"Conflict in keys names after mapping entry: {k}, file: {file}"
             )
 
     return mapping
@@ -150,21 +150,19 @@ found_node_names = []
 
 def map_tree_sanity_check(node):
     if "files" not in node:
-        raise Exception(f"Missing 'files' key in node : {node['name']}")
+        error_and_exit(f"Missing 'files' key in node {node['name']}")
     else:
         if not node["files"]:
-            raise Exception(f"Found empty files list in node: {node['name']}")
+            error_and_exit(f"Found empty files list in node: {node['name']}")
 
     for key, val in node.items():
         if key == "name":
             if val in found_node_names:
-                raise Exception(f"Duplicated node name: {val}")
+                error_and_exit(f"Duplicated node name: {val}")
             found_node_names.append(val)
         elif key == "nodes":
             if not val:
-                print_and_exit(
-                    f"ERROR: Found empty nodes list in node '{node['name']}'."
-                )
+                error_and_exit(f"Found empty nodes list in node '{node['name']}'.")
 
             for node in val:
                 map_tree_sanity_check(node)
@@ -182,7 +180,7 @@ def get_mapping_files(node):
             for node in node["nodes"]:
                 get_mapping_files(node)
         else:
-            raise Exception(f"Found empty nodes list in node: {node['name']}")
+            error_and_exit(f"Found empty nodes list in node: {node['name']}")
 
     return mapping_files
 
@@ -207,7 +205,7 @@ def get_nodes_mappings(node):
             if k not in nm:
                 nm[k] = v
             else:
-                print_and_exit(f"ERROR: Conflicting key '{k}' in node {node['name']}")
+                error_and_exit(f"Conflicting key '{k}' in node {node['name']}")
 
     nodes_mappings[node["name"]] = nm
 
@@ -216,7 +214,7 @@ def get_nodes_mappings(node):
             for node in node["nodes"]:
                 get_nodes_mappings(node)
         else:
-            raise Exception(f"Found empty nodes list in node: {node['name']}")
+            error_and_exit(f"Found empty nodes list in node: {node['name']}")
 
     return nodes_mappings
 
@@ -246,23 +244,19 @@ def nodes_mappings_sanity_check(node):
             if k not in unique_keys:
                 unique_keys[k] = name
             else:
-                print_and_exit(
-                    f"ERROR: key '{k}' found in 2 nodes: {unique_keys[k]} and {name} having the same parent."
+                error_and_exit(
+                    f"key '{k}' found in 2 nodes: {unique_keys[k]} and {name} having the same parent."
                 )
 
 
-def detect_dangling_terminals(map_chain):
-    violations_found = False
-
-    for i in range(0, len(map_chain)):
-        for k in map_chain[i]:
-            if "terminal" in map_chain[i][k]:
-                print(f"ERROR: Dangling terminal, key: {k}, map chain node: {i}")
-                violations_found = True
-        pass
-
-    if violations_found:
-        sys.exit(1)
+def detect_dangling_terminals():
+    for k, v in nodes_mappings.items():
+        for _, b in v.items():
+            if "terminal" in b and b["terminal"] != False:
+                if "_touched" not in b:
+                    error_and_exit(
+                        f"Terminal end '{b['end']}' within node '{k}' is not mapped to any pin!"
+                    )
 
 
 def resolve_single_mapping(mapping, node):
@@ -272,11 +266,12 @@ def resolve_single_mapping(mapping, node):
 
     if end in node_map:
         if "terminal" in mapping:
-            print_and_exit(
-                f"ERROR: Trying to map to the terminal end: '{mapping['end']}', file: {f}"
+            error_and_exit(
+                f"Trying to map to the terminal end: '{mapping['end']}', file: {f}"
             )
 
         mapping["end"] = node_map[end]["end"]
+        node_map[end]["_touched"] = True
         mapping["node_name"] = node["name"]
 
         if "terminal" in node_map[end]:
@@ -311,7 +306,6 @@ def resolve_mapping_tree(map_tree):
         del m["end"]
 
         mapping[key][end] = m
-    #    detect_dangling_terminals(map_chain)
 
     return mapping
 
@@ -333,8 +327,8 @@ def read_assignment_file(file):
         connection.update(aux)
         l3 = len(connection)
         if l1 + l2 != l3:
-            print_and_exit(
-                f"ERROR: Conflict in keys names after mapping port: {k}, file: {file}"
+            error_and_exit(
+                f"Conflict in keys names after mapping port: {k}, file: {file}"
             )
 
     return connection
@@ -345,7 +339,7 @@ def assign_ports_to_pins(connection, mapping):
 
     for k in connection:
         if "node" not in connection[k]:
-            raise Exception(f"Assignment {k} misses destination node!")
+            error_and_exit(f"Assignment {k} misses destination node!")
 
         node = connection[k]["node"]
         end = connection[k]["end"]
@@ -353,17 +347,17 @@ def assign_ports_to_pins(connection, mapping):
         try:
             m = mapping[node].pop(end, None)
         except KeyError:
-            print_and_exit(f"ERROR: Node with name '{node}' not found!")
+            error_and_exit(f"Node with name '{node}' not found!")
 
         if m is None:
-            print_and_exit(f"ERROR: Port '{k}' assigned to missing end '{end}'!")
+            error_and_exit(f"Port '{k}' assigned to missing end '{end}'!")
             found_violation = True
             continue
 
         connection[k]["fpga_pin"] = m["pin"]
         if "terminal" not in m:
-            print_and_exit(
-                f"ERROR: Port '{k}' assigned to pin '{m['pin']}' connected to non terminal end '{end}'!"
+            error_and_exit(
+                f"Port '{k}' assigned to pin '{m['pin']}' connected to non terminal end '{end}'!"
             )
 
     if found_violation:
@@ -425,9 +419,9 @@ def main():
     nodes_mappings_sanity_check(map_tree)
 
     resolved_tree = resolve_mapping_tree(map_tree)
+    detect_dangling_terminals()
 
     args.func(resolved_tree, args)
-    pass
 
 
 if __name__ == "__main__":
