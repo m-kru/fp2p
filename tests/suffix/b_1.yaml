@@ -1,0 +1,8 @@
+_default_:
+  suffix: "1"
+
+A1:
+    end: b2_1
+
+A2:
+  end: b2_2

@@ -1,0 +1,4 @@
+b2_[1-2]:
+  end: end_diff_[pn]
+  terminal:
+  regex:
