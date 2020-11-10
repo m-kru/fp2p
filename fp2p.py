@@ -1,3 +1,9 @@
+"""
+SPDX-License-Identifier: GPL-2.0
+
+Copyright (c) 2020 Michał Kruszewski
+"""
+
 import argparse
 import sre_yield
 import copy
@@ -15,31 +21,38 @@ def print_and_exit(msg):
 
 def parse_command_line_arguments():
     parser = argparse.ArgumentParser(
-        prog='fp2p',
+        prog="fp2p",
         description="Program for automatic assignment of ports to pins in FPGA designs. Especially useful when signals "
-                    "propagate through multiple PCBs. It is capable of simple regex expanding and applies natural "
-                    "(human) sort for pairing generated keys and values."
+        "propagate through multiple PCBs. It is capable of simple regex expanding and applies natural "
+        "(human) sort for pairing generated keys and values.",
     )
 
     subparsers = parser.add_subparsers()
 
     tree_help = "Yaml file describing mapping tree."
 
-    resolve_parser = subparsers.add_parser("resolve", help="Only resolve mapping tree and print the result.")
-    resolve_parser.add_argument('tree_file', help=tree_help)
+    resolve_parser = subparsers.add_parser(
+        "resolve", help="Only resolve mapping tree and print the result."
+    )
+    resolve_parser.add_argument("tree_file", help=tree_help)
     resolve_parser.set_defaults(func=resolve)
 
     assign_parser = subparsers.add_parser("assign", help="Assign ports to pins.")
-    assign_parser.add_argument('assignment_file', help="YAML file describing assignment for ports and terminal pins defined in the mapping tree.")
-    assign_parser.add_argument('tree_file', help=tree_help)
-    assign_parser.add_argument('output_file', help="Output constraints file destination.")
+    assign_parser.add_argument(
+        "assignment_file",
+        help="YAML file describing assignment for ports and terminal pins defined in the mapping tree.",
+    )
+    assign_parser.add_argument("tree_file", help=tree_help)
+    assign_parser.add_argument(
+        "output_file", help="Output constraints file destination."
+    )
     assign_parser.set_defaults(func=assign)
 
     return parser.parse_args()
 
 
 def set_default_parameters(mapping):
-    common_settings = mapping.pop('_default_', None)
+    common_settings = mapping.pop("_default_", None)
     if common_settings is not None:
         for port in mapping:
             for k, v in common_settings.items():
@@ -59,9 +72,9 @@ def apply_prefix_parameter(mapping):
 
     for port in mapping:
         new_key = port
-        if 'prefix' in mapping[port]:
-            new_key = mapping[port]['prefix'] + new_key
-            _ = mapping[port].pop('prefix', None)
+        if "prefix" in mapping[port]:
+            new_key = mapping[port]["prefix"] + new_key
+            _ = mapping[port].pop("prefix", None)
 
         new_mapping[new_key] = mapping[port]
 
@@ -73,9 +86,9 @@ def apply_suffix_parameter(mapping):
 
     for port in mapping:
         new_key = port
-        if 'suffix' in mapping[port]:
-            new_key = new_key + mapping[port]['suffix']
-            _ = mapping[port].pop('suffix', None)
+        if "suffix" in mapping[port]:
+            new_key = new_key + mapping[port]["suffix"]
+            _ = mapping[port].pop("suffix", None)
 
         new_mapping[new_key] = mapping[port]
 
@@ -83,14 +96,16 @@ def apply_suffix_parameter(mapping):
 
 
 def get_mapping_from_entry(key, value):
-    if 'regex' not in value or value['regex'] == False:
+    if "regex" not in value or value["regex"] == False:
         return {key: value}
 
     keys = list(sre_yield.AllStrings(key))
-    ends = list(sre_yield.AllStrings(value['end']))
+    ends = list(sre_yield.AllStrings(value["end"]))
 
     if len(keys) != len(ends):
-        raise Exception(f"Different lengths of lists after regex expansion for key: {key} end: {value['end']}")
+        raise Exception(
+            f"Different lengths of lists after regex expansion for key: {key} end: {value['end']}"
+        )
 
     keys = natsort.natsorted(keys)
     ends = natsort.natsorted(ends)
@@ -98,7 +113,7 @@ def get_mapping_from_entry(key, value):
     mapping = {}
     for k, e in zip(keys, ends):
         aux = copy.deepcopy(value)
-        aux['end'] = e
+        aux["end"] = e
         mapping[k] = aux
 
     return mapping
@@ -107,7 +122,7 @@ def get_mapping_from_entry(key, value):
 def get_mapping_from_file(file):
     mapping = {}
 
-    yaml = YAML(typ='safe')
+    yaml = YAML(typ="safe")
 
     with open(file) as f:
         map_dict = yaml.load(f)
@@ -123,7 +138,9 @@ def get_mapping_from_file(file):
         mapping.update(aux)
         l3 = len(mapping)
         if l1 + l2 != l3:
-            print_and_exit(f"ERROR: Conflict in keys names after mapping entry: {k}, file: {file}")
+            print_and_exit(
+                f"ERROR: Conflict in keys names after mapping entry: {k}, file: {file}"
+            )
 
     return mapping
 
@@ -132,20 +149,22 @@ found_node_names = []
 
 
 def map_tree_sanity_check(node):
-    if 'files' not in node:
+    if "files" not in node:
         raise Exception(f"Missing 'files' key in node : {node['name']}")
     else:
-        if not node['files']:
+        if not node["files"]:
             raise Exception(f"Found empty files list in node: {node['name']}")
 
     for key, val in node.items():
-        if key == 'name':
+        if key == "name":
             if val in found_node_names:
                 raise Exception(f"Duplicated node name: {val}")
             found_node_names.append(val)
-        elif key == 'nodes':
+        elif key == "nodes":
             if not val:
-                print_and_exit(f"ERROR: Found empty nodes list in node '{node['name']}'.")
+                print_and_exit(
+                    f"ERROR: Found empty nodes list in node '{node['name']}'."
+                )
 
             for node in val:
                 map_tree_sanity_check(node)
@@ -155,12 +174,12 @@ mapping_files = set()
 
 
 def get_mapping_files(node):
-    for f in node['files']:
+    for f in node["files"]:
         mapping_files.add(f)
 
-    if 'nodes' in node:
-        if node['nodes']:
-            for node in node['nodes']:
+    if "nodes" in node:
+        if node["nodes"]:
+            for node in node["nodes"]:
                 get_mapping_files(node)
         else:
             raise Exception(f"Found empty nodes list in node: {node['name']}")
@@ -182,7 +201,7 @@ nodes_mappings = {}
 def get_nodes_mappings(node):
     nm = {}
 
-    for f in node['files']:
+    for f in node["files"]:
         fm = files_mappings[f]
         for k, v in fm.items():
             if k not in nm:
@@ -190,11 +209,11 @@ def get_nodes_mappings(node):
             else:
                 print_and_exit(f"ERROR: Conflicting key '{k}' in node {node['name']}")
 
-    nodes_mappings[node['name']] = nm
+    nodes_mappings[node["name"]] = nm
 
-    if 'nodes' in node:
-        if node['nodes']:
-            for node in node['nodes']:
+    if "nodes" in node:
+        if node["nodes"]:
+            for node in node["nodes"]:
                 get_nodes_mappings(node)
         else:
             raise Exception(f"Found empty nodes list in node: {node['name']}")
@@ -209,12 +228,12 @@ def nodes_mappings_sanity_check(node):
     It would be possible to explicitly define to which node the end should be connected, however this approach is rigid
     to specific design and any reuse of mapping files would be tedious and time consuming.
     """
-    if 'nodes' not in node:
+    if "nodes" not in node:
         return
 
     nodes_to_check = []
-    for node in node['nodes']:
-        nodes_to_check.append(node['name'])
+    for node in node["nodes"]:
+        nodes_to_check.append(node["name"])
 
     # Do not check in case of single node as such scenario is checked when node mapping is created.
     if len(nodes_to_check) == 1:
@@ -227,7 +246,9 @@ def nodes_mappings_sanity_check(node):
             if k not in unique_keys:
                 unique_keys[k] = name
             else:
-                print_and_exit(f"ERROR: key '{k}' found in 2 nodes: {unique_keys[k]} and {name} having the same parent.")
+                print_and_exit(
+                    f"ERROR: key '{k}' found in 2 nodes: {unique_keys[k]} and {name} having the same parent."
+                )
 
 
 def detect_dangling_terminals(map_chain):
@@ -235,7 +256,7 @@ def detect_dangling_terminals(map_chain):
 
     for i in range(0, len(map_chain)):
         for k in map_chain[i]:
-            if 'terminal' in map_chain[i][k]:
+            if "terminal" in map_chain[i][k]:
                 print(f"ERROR: Dangling terminal, key: {k}, map chain node: {i}")
                 violations_found = True
         pass
@@ -245,23 +266,25 @@ def detect_dangling_terminals(map_chain):
 
 
 def resolve_single_mapping(mapping, node):
-    end = mapping['end']
+    end = mapping["end"]
 
-    node_map = nodes_mappings[node['name']]
+    node_map = nodes_mappings[node["name"]]
 
     if end in node_map:
-        if 'terminal' in mapping:
-            print_and_exit(f"ERROR: Trying to map to the terminal end: '{mapping['end']}', file: {f}")
+        if "terminal" in mapping:
+            print_and_exit(
+                f"ERROR: Trying to map to the terminal end: '{mapping['end']}', file: {f}"
+            )
             sys.exit(1)
 
-        mapping['end'] = node_map[end]['end']
-        mapping['node_name'] = node['name']
+        mapping["end"] = node_map[end]["end"]
+        mapping["node_name"] = node["name"]
 
-        if 'terminal' in node_map[end]:
-            mapping['terminal'] = None
+        if "terminal" in node_map[end]:
+            mapping["terminal"] = None
 
-        if 'nodes' in node:
-            for node in node['nodes']:
+        if "nodes" in node:
+            for node in node["nodes"]:
                 mapping = resolve_single_mapping(mapping, node)
 
     return mapping
@@ -269,34 +292,34 @@ def resolve_single_mapping(mapping, node):
 
 def resolve_mapping_tree(map_tree):
     pins = []
-    keys = nodes_mappings[map_tree['name']].keys()
+    keys = nodes_mappings[map_tree["name"]].keys()
     for p in keys:
         pins.append(p)
 
     mapping = {}
 
     for pin in pins:
-        m = {'pin': pin, 'node_name': None, 'end': pin}
+        m = {"pin": pin, "node_name": None, "end": pin}
         m = resolve_single_mapping(m, map_tree)
 
-        key = m['node_name']
+        key = m["node_name"]
         if key not in mapping:
             mapping[key] = {}
 
-        del m['node_name']
+        del m["node_name"]
 
-        end = m['end']
-        del m['end']
+        end = m["end"]
+        del m["end"]
 
         mapping[key][end] = m
-#    detect_dangling_terminals(map_chain)
+    #    detect_dangling_terminals(map_chain)
 
     return mapping
 
 
 def read_assignment_file(file):
     with open(file) as f:
-        yaml = YAML(typ='safe')
+        yaml = YAML(typ="safe")
         mapping = yaml.load(f)
 
     mapping = set_default_parameters(mapping)
@@ -311,7 +334,9 @@ def read_assignment_file(file):
         connection.update(aux)
         l3 = len(connection)
         if l1 + l2 != l3:
-            print_and_exit(f"ERROR: Conflict in keys names after mapping port: {k}, file: {file}")
+            print_and_exit(
+                f"ERROR: Conflict in keys names after mapping port: {k}, file: {file}"
+            )
 
     return connection
 
@@ -320,11 +345,11 @@ def assign_ports_to_pins(connection, mapping):
     found_violation = False
 
     for k in connection:
-        if 'node' not in connection[k]:
+        if "node" not in connection[k]:
             raise Exception(f"Assignment {k} misses destination node!")
 
-        node = connection[k]['node']
-        end = connection[k]['end']
+        node = connection[k]["node"]
+        end = connection[k]["end"]
 
         try:
             m = mapping[node].pop(end, None)
@@ -336,17 +361,21 @@ def assign_ports_to_pins(connection, mapping):
             found_violation = True
             continue
 
-        connection[k]['fpga_pin'] = m['pin']
-        if 'terminal' not in m:
-            print_and_exit(f"ERROR: Port '{k}' assigned to pin '{m['pin']}' connected to non terminal end '{end}'!")
+        connection[k]["fpga_pin"] = m["pin"]
+        if "terminal" not in m:
+            print_and_exit(
+                f"ERROR: Port '{k}' assigned to pin '{m['pin']}' connected to non terminal end '{end}'!"
+            )
 
     if found_violation:
         sys.exit(1)
 
     # If there are any terminal ends left, report it as error and exit.
     for k, v in mapping.items():
-        if 'terminal' in v:
-            print(f"ERROR: Terminal end '{k}', connected to pin '{v['pin']}' is not mapped to any port!")
+        if "terminal" in v:
+            print(
+                f"ERROR: Terminal end '{k}', connected to pin '{v['pin']}' is not mapped to any port!"
+            )
             found_violation = True
 
     if found_violation:
@@ -356,16 +385,18 @@ def assign_ports_to_pins(connection, mapping):
 
 
 def generate_constraint_file(connection, file):
-    with open(file, 'w') as f:
+    with open(file, "w") as f:
         f.write("# This file has been auto generated by the fp2p tool.\n")
         f.write("# Do not modify it by hand!\n")
         f.write("# More information on the website https://github.com/m-kru/fp2p.\n\n")
 
         for k, v in connection.items():
             pass
-            f.write("set_property PACKAGE_PIN %s [get_ports {%s}]\n" % (v['fpga_pin'], k))
-            if 'set_property' in v:
-                for k1, v1 in v['set_property'].items():
+            f.write(
+                "set_property PACKAGE_PIN %s [get_ports {%s}]\n" % (v["fpga_pin"], k)
+            )
+            if "set_property" in v:
+                for k1, v1 in v["set_property"].items():
                     f.write("set_property %s %s [get_ports {%s}]\n" % (k1, v1, k))
             f.write("\n")
 
@@ -384,7 +415,7 @@ def main():
     args = parse_command_line_arguments()
 
     with open(args.tree_file) as f:
-        yaml = YAML(typ='safe')
+        yaml = YAML(typ="safe")
         map_tree = yaml.load(f)
 
     map_tree_sanity_check(map_tree)
@@ -400,5 +431,5 @@ def main():
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
