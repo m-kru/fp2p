@@ -1,0 +1,24 @@
+_default_:
+  set_property:
+    IOSTANDARD: LVDS_33
+    DIFF_TERM: "TRUE"
+  prefix: prefix_
+  suffix: _suffix
+
+A:
+  node: board_1
+  end: pin_A
+
+B:
+  node: board_1
+  end: pin_B
+  set_property:
+    DIFF_TERM: "FALSE"
+  prefix: ""
+
+C:
+  node: board_1
+  end: pin_C
+  set_property:
+    IOSTANDARD: LVDS_25
+  suffix: ""
