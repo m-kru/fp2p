@@ -1,4 +1,0 @@
-s[1-2]:
-  end: endpoint_[1-2]
-  terminal:
-  regex:

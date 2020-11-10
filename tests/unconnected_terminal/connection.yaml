@@ -1,7 +1,0 @@
-default:
-  set_property:
-    IOSTANDARD: LVDS_25
-    DIFF_TERM: TRUE
-
-port_2:
-  end: endpoint_2
