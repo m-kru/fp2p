@@ -1,0 +1,6 @@
+_default_:
+  regex:
+
+out[1-2]:
+  node: board_2
+  end: end_diff_[pn]
