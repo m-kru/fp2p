@@ -275,7 +275,6 @@ def resolve_single_mapping(mapping, node):
             print_and_exit(
                 f"ERROR: Trying to map to the terminal end: '{mapping['end']}', file: {f}"
             )
-            sys.exit(1)
 
         mapping["end"] = node_map[end]["end"]
         mapping["node_name"] = node["name"]
