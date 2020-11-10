@@ -267,7 +267,7 @@ def resolve_single_mapping(mapping, node):
     if end in node_map:
         if "terminal" in mapping:
             error_and_exit(
-                f"Trying to map to the terminal end: '{mapping['end']}', file: {f}"
+                f"Trying to map to the terminal end '{mapping['end']}' within node '{node['name']}'!"
             )
 
         mapping["end"] = node_map[end]["end"]

@@ -1,0 +1,7 @@
+out_1:
+  node: board_2
+  end: end_1
+
+out_2:
+  node: board_2
+  end: end_2
