@@ -357,7 +357,7 @@ def assign_ports_to_pins(connection, mapping):
         connection[k]["fpga_pin"] = m["pin"]
         if "terminal" not in m:
             error_and_exit(
-                f"Port '{k}' assigned to pin '{m['pin']}' connected to non terminal end '{end}'!"
+                f"Port '{k}' assigned to pin '{m['pin']}' mapped to non terminal end '{end}' within node '{node}'!"
             )
 
     if found_violation:
