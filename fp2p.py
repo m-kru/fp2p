@@ -44,9 +44,10 @@ def set_default_parameters(mapping):
         for port in mapping:
             for k, v in common_settings.items():
                 if k in mapping[port]:
-                    aux = mapping[port][k]
-                    mapping[port][k] = copy.deepcopy(v)
-                    mapping[port][k].update(aux)
+                    if type(v) is dict:
+                        aux = mapping[port][k]
+                        mapping[port][k] = copy.deepcopy(v)
+                        mapping[port][k].update(aux)
                 else:
                     mapping[port][k] = v
 
