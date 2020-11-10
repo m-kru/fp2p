@@ -90,7 +90,7 @@ def get_mapping_from_entry(key, value):
     ends = list(sre_yield.AllStrings(value['end']))
 
     if len(keys) != len(ends):
-        raise BaseException(f"Different lengths of lists after regex expansion for key: {key} end: {value['end']}")
+        raise Exception(f"Different lengths of lists after regex expansion for key: {key} end: {value['end']}")
 
     keys = natsort.natsorted(keys)
     ends = natsort.natsorted(ends)
@@ -133,15 +133,15 @@ found_node_names = []
 
 def map_tree_sanity_check(node):
     if 'files' not in node:
-        raise BaseException(f"Missing 'files' key in node : {node['name']}")
+        raise Exception(f"Missing 'files' key in node : {node['name']}")
     else:
         if not node['files']:
-            raise BaseException(f"Found empty files list in node: {node['name']}")
+            raise Exception(f"Found empty files list in node: {node['name']}")
 
     for key, val in node.items():
         if key == 'name':
             if val in found_node_names:
-                raise BaseException(f"Duplicated node name: {val}")
+                raise Exception(f"Duplicated node name: {val}")
             found_node_names.append(val)
         elif key == 'nodes':
             if not val:
@@ -163,7 +163,7 @@ def get_mapping_files(node):
             for node in node['nodes']:
                 get_mapping_files(node)
         else:
-            raise BaseException(f"Found empty nodes list in node: {node['name']}")
+            raise Exception(f"Found empty nodes list in node: {node['name']}")
 
     return mapping_files
 
@@ -197,7 +197,7 @@ def get_nodes_mappings(node):
             for node in node['nodes']:
                 get_nodes_mappings(node)
         else:
-            raise BaseException(f"Found empty nodes list in node: {node['name']}")
+            raise Exception(f"Found empty nodes list in node: {node['name']}")
 
     return nodes_mappings
 
@@ -209,6 +209,9 @@ def nodes_mappings_sanity_check(node):
     It would be possible to explicitly define to which node the end should be connected, however this approach is rigid
     to specific design and any reuse of mapping files would be tedious and time consuming.
     """
+    if 'nodes' not in node:
+        return
+
     nodes_to_check = []
     for node in node['nodes']:
         nodes_to_check.append(node['name'])
@@ -297,6 +300,8 @@ def read_assignment_file(file):
         mapping = yaml.load(f)
 
     mapping = set_default_parameters(mapping)
+    mapping = apply_prefix_parameter(mapping)
+    mapping = apply_suffix_parameter(mapping)
 
     connection = {}
     for k, v in mapping.items():
@@ -311,10 +316,12 @@ def read_assignment_file(file):
     return connection
 
 
-def map_ports_to_pins(connection, mapping):
+def assign_ports_to_pins(connection, mapping):
     found_violation = False
 
     for k in connection:
+        if 'node' not in connection[k]:
+            raise Exception(f"Assignment {k} misses destination node!")
 
         node = connection[k]['node']
         end = connection[k]['end']
@@ -369,7 +376,7 @@ def resolve(mapping, args):
 
 def assign(resolved_tree, args):
     connection = read_assignment_file(args.assignment_file)
-    connection = map_ports_to_pins(connection, resolved_tree)
+    connection = assign_ports_to_pins(connection, resolved_tree)
     generate_constraint_file(connection, args.output_file)
 
 
