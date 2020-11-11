@@ -1,0 +1,11 @@
+_default_:
+  terminal:
+
+D1:
+  end: end_A
+
+D2:
+  end: end_B
+
+D3:
+  end: end_C

@@ -405,9 +405,20 @@ def resolve(mapping, args):
     pprint.pprint(mapping)
 
 
+def detect_unassigned_terminals(mapping):
+    for node, aux in mapping.items():
+        for end, v in aux.items():
+            if "terminal" in v and v["terminal"] != False:
+                if "_assigned_to" not in v:
+                    error_and_exit(
+                        f"Terminal end '{end}' within node '{node}' not assigned to any port!"
+                    )
+
+
 def assign(resolved_tree, args):
     connection = read_assignment_file(args.assignment_file)
     connection = assign_ports_to_pins(connection, resolved_tree)
+    detect_unassigned_terminals(resolved_tree)
     generate_constraint_file(connection, args.output_file)
 
 
