@@ -341,23 +341,29 @@ def assign_ports_to_pins(connection, mapping):
         try:
             node = connection[k]["node"]
         except KeyError:
-            error_and_exit(f"Assignment {k} misses destination node!")
+            error_and_exit(f"Port {k} misses destination node!")
 
         try:
             end = connection[k]["end"]
         except KeyError:
-            error_and_exit(f"Assignment {k} misses destination end!")
+            error_and_exit(f"Port {k} misses destination end!")
 
         try:
-#            m = mapping[node].pop(end, None)
-            m = mapping[node][end]
-            if '_assigned_to' in m:
+            try:
+                n = mapping[node]
+            except KeyError:
+                error_and_exit(f"Node '{node}' not found in the resolved tree!")
+
+            m = n[end]
+            if "_assigned_to" in m:
                 error_and_exit(
                     f"Trying to assign port '{k}' to pin '{m['pin']}' which is already assigned to port '{m['_assigned_to']}'!"
                 )
-            m['_assigned_to'] = k
+            m["_assigned_to"] = k
         except KeyError:
-            error_and_exit(f"Node '{node}' not found in resolved tree!")
+            error_and_exit(
+                f"Port '{k}', end '{end}' not found in the resolved tree within node '{node}'!"
+            )
 
         if m is None:
             error_and_exit(f"Port '{k}' assigned to missing end '{end}'!")
