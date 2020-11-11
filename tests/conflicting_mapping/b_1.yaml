@@ -1,0 +1,8 @@
+_default_:
+  terminal:
+
+D1:
+  end: pin_A
+
+D2:
+  end: pin_B

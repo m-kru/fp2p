@@ -139,7 +139,7 @@ def get_mapping_from_file(file):
         l3 = len(mapping)
         if l1 + l2 != l3:
             error_and_exit(
-                f"Conflict in keys names after mapping entry: {k}, file: {file}"
+                f"Conflict in keys names after mapping entry: {k}, file: {file}!"
             )
 
     return mapping
@@ -205,7 +205,7 @@ def get_nodes_mappings(node):
             if k not in nm:
                 nm[k] = v
             else:
-                error_and_exit(f"Conflicting key '{k}' in node {node['name']}")
+                error_and_exit(f"Conflicting key '{k}' within node '{node['name']}'!")
 
     nodes_mappings[node["name"]] = nm
 
