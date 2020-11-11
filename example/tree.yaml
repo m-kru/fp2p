@@ -4,8 +4,8 @@ files:
 nodes:
   - name: board_2_connector_1
     files:
-      - b_2_c_1.yaml
+      - board_2/c_1.yaml
   - name: board_2_connector_2
     files:
-      - b_2_c_2_f_1.yaml
-      - b_2_c_2_f_2.yaml
+      - board_2/c_2_f_1.yaml
+      - board_2/c_2_f_2.yaml
