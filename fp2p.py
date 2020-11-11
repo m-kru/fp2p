@@ -338,21 +338,29 @@ def assign_ports_to_pins(connection, mapping):
     found_violation = False
 
     for k in connection:
-        if "node" not in connection[k]:
+        try:
+            node = connection[k]["node"]
+        except KeyError:
             error_and_exit(f"Assignment {k} misses destination node!")
 
-        node = connection[k]["node"]
-        end = connection[k]["end"]
+        try:
+            end = connection[k]["end"]
+        except KeyError:
+            error_and_exit(f"Assignment {k} misses destination end!")
 
         try:
-            m = mapping[node].pop(end, None)
+#            m = mapping[node].pop(end, None)
+            m = mapping[node][end]
+            if '_assigned_to' in m:
+                error_and_exit(
+                    f"Trying to assign port '{k}' to pin '{m['pin']}' which is already assigned to port '{m['_assigned_to']}'!"
+                )
+            m['_assigned_to'] = k
         except KeyError:
-            error_and_exit(f"Node with name '{node}' not found!")
+            error_and_exit(f"Node '{node}' not found in resolved tree!")
 
         if m is None:
             error_and_exit(f"Port '{k}' assigned to missing end '{end}'!")
-            found_violation = True
-            continue
 
         connection[k]["fpga_pin"] = m["pin"]
         if "terminal" not in m:
@@ -360,19 +368,12 @@ def assign_ports_to_pins(connection, mapping):
                 f"Port '{k}' assigned to pin '{m['pin']}' mapped to non terminal end '{end}' within node '{node}'!"
             )
 
-    if found_violation:
-        sys.exit(1)
-
     # If there are any terminal ends left, report it as error and exit.
     for k, v in mapping.items():
         if "terminal" in v:
-            print(
-                f"ERROR: Terminal end '{k}', connected to pin '{v['pin']}' is not mapped to any port!"
+            error_and_exit(
+                f"Terminal end '{k}', connected to pin '{v['pin']}' is not mapped to any port!"
             )
-            found_violation = True
-
-    if found_violation:
-        sys.exit(1)
 
     return connection
 

@@ -1,0 +1,1 @@
+[91mERROR[0m: Trying to assign port 'C' to pin 'D1' which is already assigned to port 'A'!
