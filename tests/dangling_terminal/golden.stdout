@@ -1,1 +1,1 @@
-[91mERROR[0m: Terminal end 'end_2' within node 'board_2' is not mapped to any pin!
+[91mERROR[0m: Terminal end 'end_2' within node 'board_2' not mapped to any pin!
