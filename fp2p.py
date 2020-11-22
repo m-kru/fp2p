@@ -173,7 +173,9 @@ mapping_files = set()
 
 def get_mapping_files(node):
     if type(node["files"]) == str:
-        error_and_exit(f"Node '{node['name']}' 'files' key value is a string '{node['files']}', expecting list of strings")
+        error_and_exit(
+            f"Node '{node['name']}' 'files' key value is a string '{node['files']}', expecting list of strings"
+        )
 
     for f in node["files"]:
         mapping_files.add(f)
@@ -338,8 +340,6 @@ def read_assignment_file(file):
 
 
 def assign_ports_to_pins(connection, mapping):
-    found_violation = False
-
     for k in connection:
         try:
             node = connection[k]["node"]
