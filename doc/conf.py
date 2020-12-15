@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'FP2P'
+project = 'FP2P - FPGA Port To Pin'
 copyright = '2020, Michał Kruszewski'
 author = 'Michał Kruszewski'
 

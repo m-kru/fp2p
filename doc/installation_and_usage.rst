@@ -31,3 +31,9 @@ fp2p supports 3 subcommands:
 After preparing proper mapping tree files or assignment files user only needs to call fp2p with one of the subcommands and proper order of arguments.
 This is further explained in the section ...
 You can also always run :code:`python fp2p.py -h` or :code:`python fp2p.py {subcommand} -h`.
+
+Windows
+=======
+
+The program has not been tested on Windows OS, and no one has so far reported that it works corretly.
+However, it *should* work, as no OS specific mechanisms or system calls are used.
