@@ -4,7 +4,7 @@ Installation and usage
 Installation
 ============
 
-fp2p is not available on the `PyPI https://pypi.org/`_ website.
+fp2p is not available on the `PyPI <https://pypi.org/>`_ website.
 Why?
 fp2p is pure program, contained within single file, there is no library part, it can't be imported.
 This will *never* change.
