@@ -31,12 +31,6 @@ def parse_command_line_arguments():
 
     tree_help = "Yaml file describing mapping tree."
 
-    resolve_parser = subparsers.add_parser(
-        "resolve", help="Only resolve mapping tree and print the result."
-    )
-    resolve_parser.add_argument("tree_file", help=tree_help)
-    resolve_parser.set_defaults(func=resolve)
-
     assign_parser = subparsers.add_parser("assign", help="Assign ports to pins.")
     assign_parser.add_argument("tree_file", help=tree_help)
     assign_parser.add_argument(
@@ -47,6 +41,19 @@ def parse_command_line_arguments():
         "output_file", help="Output constraints file destination."
     )
     assign_parser.set_defaults(func=assign)
+
+    graph_parser = subparsers.add_parser(
+        "graph",
+        help="Resolve mapping tree and print graph. Useful for debugging tree files.",
+    )
+    graph_parser.add_argument("tree_file", help=tree_help)
+    graph_parser.set_defaults(func=graph)
+
+    resolve_parser = subparsers.add_parser(
+        "resolve", help="Only resolve mapping tree and print the result."
+    )
+    resolve_parser.add_argument("tree_file", help=tree_help)
+    resolve_parser.set_defaults(func=resolve)
 
     return parser.parse_args()
 
@@ -148,7 +155,7 @@ def get_mapping_from_file(file):
 found_node_names = []
 
 
-def map_tree_sanity_check(node):
+def tree_sanity_check(node):
     if "files" not in node:
         error_and_exit(f"Missing 'files' key in node '{node['name']}'")
     else:
@@ -165,7 +172,7 @@ def map_tree_sanity_check(node):
                 error_and_exit(f"Found empty nodes list in node '{node['name']}'")
 
             for node in val:
-                map_tree_sanity_check(node)
+                tree_sanity_check(node)
 
 
 mapping_files = set()
@@ -404,8 +411,37 @@ def generate_constraint_file(connection, file):
             f.write("\n")
 
 
-def resolve(mapping, args):
-    pprint.pprint(mapping)
+def resolve(tree, resolved_tree, args):
+    pprint.pprint(resolved_tree)
+
+
+def add_graph_nodes(dot, node):
+    node_label = "<<B>" + node["name"] + "</B><br />"
+    for f in node["files"]:
+        node_label += f + "<br />"
+    node_label += ">"
+    dot.node(node["name"], label=node_label)
+
+    if "nodes" in node:
+        for n in node["nodes"]:
+            add_graph_nodes(dot, n)
+
+
+def add_graph_edges(dot, node):
+    if "nodes" in node:
+        for n in node["nodes"]:
+            dot.edge(node["name"], n["name"])
+            add_graph_edges(dot, n)
+
+
+def graph(tree, resolved_tree, args):
+    from graphviz import Digraph
+
+    dot = Digraph(name=args.tree_file.split(".")[0] + ".fp2p")
+
+    add_graph_nodes(dot, tree)
+    add_graph_edges(dot, tree)
+    dot.render(view=True, cleanup=True)
 
 
 def detect_unassigned_terminals(mapping):
@@ -418,7 +454,7 @@ def detect_unassigned_terminals(mapping):
                     )
 
 
-def assign(resolved_tree, args):
+def assign(tree, resolved_tree, args):
     connection = read_assignment_file(args.assignment_file)
     connection = assign_ports_to_pins(connection, resolved_tree)
     detect_unassigned_terminals(resolved_tree)
@@ -430,19 +466,19 @@ def main():
 
     with open(args.tree_file) as f:
         yaml = YAML(typ="safe")
-        map_tree = yaml.load(f)
+        tree = yaml.load(f)
 
-    map_tree_sanity_check(map_tree)
+    tree_sanity_check(tree)
 
-    get_mapping_files(map_tree)
+    get_mapping_files(tree)
     get_file_mappings()
-    get_nodes_mappings(map_tree)
-    nodes_mappings_sanity_check(map_tree)
+    get_nodes_mappings(tree)
+    nodes_mappings_sanity_check(tree)
 
-    resolved_tree = resolve_mapping_tree(map_tree)
+    resolved_tree = resolve_mapping_tree(tree)
     detect_dangling_terminals()
 
-    args.func(resolved_tree, args)
+    args.func(tree, resolved_tree, args)
 
 
 if __name__ == "__main__":
