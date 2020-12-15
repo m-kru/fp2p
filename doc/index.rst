@@ -10,6 +10,7 @@ Welcome to FP2P's documentation!
    :caption: Contents:
 
    overview
+   glossary
    installation_and_usage
    file_types
    subcommands
