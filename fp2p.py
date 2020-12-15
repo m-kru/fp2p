@@ -38,11 +38,11 @@ def parse_command_line_arguments():
     resolve_parser.set_defaults(func=resolve)
 
     assign_parser = subparsers.add_parser("assign", help="Assign ports to pins.")
+    assign_parser.add_argument("tree_file", help=tree_help)
     assign_parser.add_argument(
         "assignment_file",
         help="YAML file describing assignment for ports and terminal pins defined in the mapping tree.",
     )
-    assign_parser.add_argument("tree_file", help=tree_help)
     assign_parser.add_argument(
         "output_file", help="Output constraints file destination."
     )

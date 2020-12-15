@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python ../fp2p.py assign assignment.yaml tree.yaml tmp.xdc
+python ../fp2p.py assign tree.yaml assignment.yaml tmp.xdc
