@@ -13,6 +13,7 @@ Welcome to FP2P's documentation!
    installation_and_usage
    file_types
    subcommands
+   tips
 
 
 Indices and tables

@@ -96,3 +96,7 @@ Each tree node can consist of multiple mapping files.
 Thanks to this, it is possible to define mappings for different connectors located on the same board in separate files or split connector mappings into multiple files to group them by functionality.
 
 The :code:`nodes` is a list of children nodes connected with a given node.
+
+Assignment file
+===============
+The assignment file is used for defining which port should be assigned to which terminal pin.
