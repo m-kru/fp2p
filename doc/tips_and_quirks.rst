@@ -1,5 +1,20 @@
-Tips
-----
+Tips and quirks
+---------------
+
+TRUE and FALSE in design constraint properties
+==============================================
+By default :code:`'TRUE'`, :code:`'true'`, :code:`'True'` are interpreted by YAML as boolean and then printed to the file as :code:`'True'` string.
+In .xdc file we want :code:`'TRUE'` string so double qoutes :code:`"` are needed.
+Not sure which EDA tools can handle correctly :code:`'True'` or :code:`'true'` strings, but Xilinx Vivado can't.
+The same applies to the :code:`"FALSE"`.
+
+.. code-block:: yaml
+
+   _default_:
+     set_property:
+       IOSTANDARD: LVDS_33
+       # Use "TRUE" or "FALSE" strings for boolean properties.
+       DIFF_TERM: "TRUE"
 
 Net names on schematics
 =======================

@@ -15,7 +15,7 @@ Welcome to FP2P's documentation!
    file_types
    subcommands
    mistakes_detection
-   tips
+   tips_and_quirks
 
 
 Indices and tables
