@@ -29,7 +29,7 @@ def parse_command_line_arguments():
 
     subparsers = parser.add_subparsers()
 
-    tree_help = "Yaml file describing mapping tree."
+    tree_help = "YAML file describing mapping tree."
 
     assign_parser = subparsers.add_parser("assign", help="Assign ports to pins.")
     assign_parser.add_argument("tree_file", help=tree_help)
@@ -44,7 +44,7 @@ def parse_command_line_arguments():
 
     graph_parser = subparsers.add_parser(
         "graph",
-        help="Resolve mapping tree and print graph. Useful for debugging tree files.",
+        help="Render graph for tree file. Useful for debugging tree files.",
     )
     graph_parser.add_argument("tree_file", help=tree_help)
     graph_parser.set_defaults(func=graph)
