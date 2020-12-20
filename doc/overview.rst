@@ -18,3 +18,8 @@ The problem has been known for a long time and is especially annoying in data ac
 However, there is still no generic user-friendly open-source solution (or at least none has been found).
 The implementation has two main goals, safety (check as many potential human mistakes as possible) and reusability (reuse connections mappings, defined in files, in multiple designs).
 It is fully declarative and programming language-agnostic from the users perspective.
+
+License
+=======
+
+The project is licensed under the GPL-2.0 License.
