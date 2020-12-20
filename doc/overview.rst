@@ -19,6 +19,14 @@ However, there is still no generic user-friendly open-source solution (or at lea
 The implementation has two main goals, safety (check as many potential human mistakes as possible) and reusability (reuse connections mappings, defined in files, in multiple designs).
 It is fully declarative and programming language-agnostic from the users perspective.
 
+If you want to jump straight to the examples check `example <https://github.com/m-kru/fp2p/tree/master/example>`_ and `tests <https://github.com/m-kru/fp2p/tree/master/tests>`_.
+
+Status
+======
+
+The project is considered as finished.
+Only bug fixes and minor improvements not breaking backward compatibility will be accepted.
+
 License
 =======
 
