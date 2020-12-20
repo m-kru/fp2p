@@ -13,6 +13,7 @@ Welcome to FP2P's documentation!
    glossary
    installation_and_usage
    file_types
+   special_keys
    subcommands
    mistakes_detection
    tips_and_quirks

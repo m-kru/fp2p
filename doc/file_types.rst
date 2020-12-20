@@ -36,32 +36,6 @@ So, mapping file is a dictionary of dictionaries (single outer dictionary, one o
 The inner dictionary has one mandatory key, namely :code:`end`, that denotes the name of the output end.
 Within the inner dictionary, some metadata about particular mapping can be placed. There are two optional special keys :code:`regex` and :code:`terminal`, that do not need any value to be correctly interpreted (can be solely the key).
 
-The :code:`terminal` key functions like a type annotation.
-By default end pins are not intended to be connected to the FPGA ports.
-To indicate, that the end pin must be connected to the port, a special property called terminal must be added to this end pin.
-What is more, nothing more can be mapped to the pin marked as terminal.
-To some extent, this mechanism is similar in its nature to the mutability aspect of the Rust programming language and provides the basics for extensive mistakes detection.
-Terminal pins can be defined in each node of the tree, they are *not* limited only to the leaf nodes.
-
-The :code:`regex` key is used to reduce verbosity.
-It enables regex expanding (`sre_yield <https://github.com/google/sre_yield>`_) for the given mapping.
-After expansion, natural (human) sorting (`natsort <https://github.com/SethMMorton/ natsort>`_) is applied to both names so that they can be mapped in a deterministic way.
-In case of any mismatch of the lengths of generated lists the error is immediately reported.
-
-.. code-block:: yaml
-   :caption: :code:`regex` attribute example.
-
-   A[1-3]:
-     end: s[1-3]
-     regex:
-   # Above is equivalent to the following:
-   A1:
-     end: s1
-   A2:
-     end: s2
-   A3:
-     end: s3
-
 Tree file
 =========
 The tree file is used for defining the structure of the setup (how boards, connectors and cables are connected).
@@ -99,4 +73,46 @@ The :code:`nodes` is a list of children nodes connected with a given node.
 
 Assignment file
 ===============
-The assignment file is used for defining which port should be assigned to which terminal pin.
+The assignment file is used for defining port assignments to the terminal pins.
+
+.. code-block:: yaml
+   :caption: Example assignment file.
+
+   _default_:
+     set_property:
+       IOSTANDARD: LVDS_33
+       DIFF_TERM: "TRUE"
+   
+   board_2_connector_1:
+     port[1]:
+       end: end_pin_1
+       set_property:
+         IOSTANDARD: LVDS_25
+   
+   board_2_connector_2:
+     port[2]:
+       end: end_pin_2
+       set_property:
+         DIFF_TERM: "FALSE"
+   
+     port[3]:
+       end: end_pin_3
+   
+     # Differential pair example
+     diff_[pn]:
+       node: board_2_connector_2
+       end: end_diff_pin_[pn]
+       regex:
+   
+   board_1:
+     port[4]:
+       end: end_pin_4
+       end: s3
+
+The assignment file can also be seen as a dictionary of dictionaries.
+Within the outer dictionary, single item is a dictionary defining assignments within the particular node (except  the :code:`_default_` key, see :ref:`_default_`).
+The *key* is the name of the node, and the *value* is a dictionary.
+
+Within the inner dictionaries, single item is an assignment.
+The *key* is the name of the port.
+The destination pin name is placed under the :code:`end` key.
