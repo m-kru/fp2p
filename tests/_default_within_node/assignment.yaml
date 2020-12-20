@@ -2,10 +2,13 @@ _default_:
   set_property:
     IOSTANDARD: LVDS_33
     DIFF_TERM: "TRUE"
-  prefix: prefix_
+  prefix: foo_
   suffix: _suffix
 
 board_1:
+  _default_:
+    prefix: prefix_
+
   A:
     end: pin_A
 

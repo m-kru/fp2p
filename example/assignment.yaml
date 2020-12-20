@@ -7,29 +7,28 @@ _default_:
     # Not sure if EDA tools can handle correctly 'True' or 'true' strings.
     DIFF_TERM: "TRUE"
 
-port[1]:
-  node: board_2_connector_1
-  end: end_pin_1
-  set_property:
-    IOSTANDARD: LVDS_25
+board_2_connector_1:
+  port[1]:
+    end: end_pin_1
+    set_property:
+      IOSTANDARD: LVDS_25
 
-port[2]:
-  node: board_2_connector_2
-  end: end_pin_2
-  set_property:
-    # Same story as TRUE
-    DIFF_TERM: "FALSE"
+board_2_connector_2:
+  port[2]:
+    end: end_pin_2
+    set_property:
+      # Same story as TRUE
+      DIFF_TERM: "FALSE"
 
-port[3]:
-  node: board_2_connector_2
-  end: end_pin_3
+  port[3]:
+    end: end_pin_3
 
-port[4]:
-  node: board_1
-  end: end_pin_4
+  # Differential pair example
+  diff_[pn]:
+    node: board_2_connector_2
+    end: end_diff_pin_[pn]
+    regex:
 
-# Differential pair example
-diff_[pn]:
-  node: board_2_connector_2
-  end: end_diff_pin_[pn]
-  regex:
+board_1:
+  port[4]:
+    end: end_pin_4

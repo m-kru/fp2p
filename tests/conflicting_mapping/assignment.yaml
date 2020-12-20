@@ -1,11 +1,7 @@
-A:
-  node: board_1
-  end: pin_A
-
-B:
-  node: board_1
-  end: pin_B
-
-C:
-  node: board_1
-  end: pin_C
+board_1:
+  A:
+    end: pin_A
+  B:
+    end: pin_B
+  C:
+    end: pin_C

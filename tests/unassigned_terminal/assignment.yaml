@@ -1,7 +1,5 @@
-A:
-  node: board_1
-  end: end_A
-
-B:
-  node: board_1
-  end: end_B
+board_1:
+  A:
+    end: end_A
+  B:
+    end: end_B

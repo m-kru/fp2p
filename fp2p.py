@@ -58,20 +58,20 @@ def parse_command_line_arguments():
     return parser.parse_args()
 
 
-def set_default_parameters(mapping):
-    common_settings = mapping.pop("_default_", None)
+def set_default_parameters(dict_):
+    common_settings = dict_.pop("_default_", None)
     if common_settings is not None:
-        for port in mapping:
+        for port in dict_:
             for k, v in common_settings.items():
-                if k in mapping[port]:
+                if k in dict_[port]:
                     if type(v) is dict:
-                        aux = mapping[port][k]
-                        mapping[port][k] = copy.deepcopy(v)
-                        mapping[port][k].update(aux)
+                        aux = dict_[port][k]
+                        dict_[port][k] = copy.deepcopy(v)
+                        dict_[port][k].update(aux)
                 else:
-                    mapping[port][k] = v
+                    dict_[port][k] = v
 
-    return mapping
+    return dict_
 
 
 def apply_prefix_parameter(mapping):
@@ -322,17 +322,36 @@ def resolve_mapping_tree(map_tree):
     return mapping
 
 
-def read_assignment_file(file):
-    with open(file) as f:
-        yaml = YAML(typ="safe")
-        mapping = yaml.load(f)
+def flatten_assignment_dictionary(assignment):
+    flattened = {}
 
-    mapping = set_default_parameters(mapping)
-    mapping = apply_prefix_parameter(mapping)
-    mapping = apply_suffix_parameter(mapping)
+    for node, assignments in assignment.items():
+        # Propagate global defaults. They are applied later.
+        if node == "_default_":
+            flattened[node] = assignments
+            continue
+
+        # Set node specific defaults.
+        assignments = set_default_parameters(assignments)
+        for k, v in assignments.items():
+            v['node'] = node
+            flattened[k] = v
+
+    return flattened
+
+
+def read_assignment_file(file_):
+    with open(file_) as f:
+        yaml = YAML(typ="safe")
+        assignment = yaml.load(f)
+
+    assignment = flatten_assignment_dictionary(assignment)
+    assignment = set_default_parameters(assignment)
+    assignment = apply_prefix_parameter(assignment)
+    assignment = apply_suffix_parameter(assignment)
 
     connection = {}
-    for k, v in mapping.items():
+    for k, v in assignment.items():
         aux = get_mapping_from_entry(k, v)
         l1 = len(aux)
         l2 = len(connection)
@@ -340,7 +359,7 @@ def read_assignment_file(file):
         l3 = len(connection)
         if l1 + l2 != l3:
             error_and_exit(
-                f"Conflict in keys names after mapping port '{k}', file '{file}'"
+                f"Conflict in keys names in the assignment file after adding assignment '{k}'"
             )
 
     return connection
