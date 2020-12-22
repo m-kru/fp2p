@@ -14,7 +14,7 @@ Anything can be placed in the default section.
 If it has no meaning, it will be simply ignored.
 
 In case of the assignment file, there can be single *_default_* section per file and single *_default_* section per node.
-Valuse set in the per node section have take precedence.
+Valuse set in the per node section take precedence.
 Values set within the *_default_* sections can always be overwritten within the particular items.
 
 .. code-block:: yaml
