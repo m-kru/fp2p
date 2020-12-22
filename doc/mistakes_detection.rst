@@ -13,3 +13,4 @@ The application is capable of detecting and reporting the following mistakes:
 #. Conflicting assignments - the same port assigned twice.
 #. Assigning to missing pins.
 #. Mapping to terminal pins.
+#. Duplicated node names - at least 2 nodes with the same name.
