@@ -18,6 +18,8 @@ The problem has been known for a long time and is especially annoying in data ac
 However, there is still no generic user-friendly open-source solution (or at least none has been found).
 The implementation has two main goals, safety (check as many potential human mistakes as possible) and reusability (reuse connections mappings, defined in files, in multiple designs).
 It is fully declarative and programming language-agnostic from the users perspective.
+Currently 2 target EDA tools are supported Vivado and Quartus.
+Adding support for another target EDA tool is very easy, as the analysis and resolving are completely decoupled from the constraint file generation.
 
 If you want to jump straight to the examples check `example <https://github.com/m-kru/fp2p/tree/master/example>`_ and `tests <https://github.com/m-kru/fp2p/tree/master/tests>`_.
 

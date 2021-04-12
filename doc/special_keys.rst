@@ -116,9 +116,14 @@ Not yet implemented as there was no need for it so far.
 set_property
 ============
 The :code:`set_property` section is used for setting FPGA pin properties.
-This attribute makes sense only for the assignment file.
+This attribute makes sense only for the assignment file and Vivado EDA tool.
 When setting property, *key* is the name of the property and *value* is the value of the property.
 See also :ref:`TRUE and FALSE in design constraint properties`, as it may save you some time.
 
 Properties are not checked by the fp2p tool in any way.
 They are simply forwarded to the auto generated constraint file, and later checked by the EDA tool.
+
+set_instance_assignment
+=======================
+The :code:`set_instance_assignment` section is used for setting FPGA pin properties.
+This attribute makes sense only for the assignment file and Quartus EDA tool.
