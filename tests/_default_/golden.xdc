@@ -16,4 +16,3 @@ set_property DIFF_TERM FALSE [get_ports {B_suffix}]
 set_property PACKAGE_PIN D3 [get_ports {prefix_C}]
 set_property IOSTANDARD LVDS_25 [get_ports {prefix_C}]
 set_property DIFF_TERM TRUE [get_ports {prefix_C}]
-

@@ -8,4 +8,3 @@
 set_property PACKAGE_PIN A1 [get_ports {out1}]
 
 set_property PACKAGE_PIN A2 [get_ports {out2}]
-

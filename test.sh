@@ -13,4 +13,4 @@ do
 	)
 done
 
-echo -e "All \e[1;32mPASSED\e[0m!"
+echo "\nAll \e[1;32mPASSED\e[0m!"

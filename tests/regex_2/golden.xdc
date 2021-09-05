@@ -10,4 +10,3 @@ set_property PACKAGE_PIN A1 [get_ports {out1}]
 set_property PACKAGE_PIN A2 [get_ports {out2}]
 
 set_property PACKAGE_PIN A3 [get_ports {dummy[1-2]}]
-

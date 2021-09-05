@@ -1,4 +1,4 @@
 #!/bin/sh
 
-python ../../fp2p.py assign tree.yaml assignment.yaml test.xdc > test.stdout
-cmp golden.stdout test.stdout
+../../fp2p.py assign tree.yaml assignment.yaml vivado 1>/dev/null 2> stderr
+cmp stderr.golden stderr
