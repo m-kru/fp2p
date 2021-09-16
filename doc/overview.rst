@@ -33,3 +33,21 @@ License
 =======
 
 The project is licensed under the GPL-2.0 License.
+
+Citation
+========
+
+If you find fp2p useful, and write any academic publication on a project utilizing fp2p please consider citing.
+
+.. code-block:: md
+
+   @ARTICLE{mkru_fp2p_ieee,
+     author={Kruszewski, Michał and Zabołotny, Wojciech Marek},
+     journal={IEEE Transactions on Nuclear Science},
+     title={Safe and Reusable Approach for Pin-to-Port Assignment in Multiboard FPGA Data Acquisition and Control Designs},
+     year={2021},
+     volume={68},
+     number={6},
+     pages={1186-1193},
+     doi={10.1109/TNS.2021.3074530}
+   }

@@ -21,7 +21,7 @@ project = 'FP2P - FPGA Port To Pin'
 copyright = '2020, Michał Kruszewski'
 author = 'Michał Kruszewski'
 
-
+master_doc = 'index'
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
